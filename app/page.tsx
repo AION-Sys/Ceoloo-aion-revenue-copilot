@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { LeadList } from "@/components/LeadList";
 import { RepSessionBar } from "@/components/RepSessionBar";
 import { WorkflowPhase } from "@/components/WorkflowPhase";
 import { getAuthenticatedUser, getRepSession } from "@/lib/auth/session";
+import { listLeadsForOrganization } from "@/lib/leads/repository";
+import { getSupabasePublicEnv } from "@/lib/supabase/env";
 
 const phases = [
   {
@@ -48,6 +51,11 @@ export default async function HomePage() {
     }
   }
 
+  const leads =
+    repSession && getSupabasePublicEnv().ok
+      ? await listLeadsForOrganization(repSession.organizationId)
+      : [];
+
   return (
     <main className="page">
       {repSession ? <RepSessionBar session={repSession} /> : null}
@@ -66,11 +74,14 @@ export default async function HomePage() {
           </Link>
         </section>
       ) : (
-        <section className="grid">
-          {phases.map((phase) => (
-            <WorkflowPhase key={phase.id} title={phase.title} items={phase.items} />
-          ))}
-        </section>
+        <>
+          <LeadList leads={leads} />
+          <section className="grid">
+            {phases.map((phase) => (
+              <WorkflowPhase key={phase.id} title={phase.title} items={phase.items} />
+            ))}
+          </section>
+        </>
       )}
     </main>
   );
