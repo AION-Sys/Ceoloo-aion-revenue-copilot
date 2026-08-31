@@ -15,18 +15,6 @@ begin
 end;
 $$;
 
-create or replace function public.user_organization_ids()
-returns setof uuid
-language sql
-stable
-security definer
-set search_path = public
-as $$
-  select organization_id
-  from public.organization_members
-  where user_id = auth.uid();
-$$;
-
 -- ---------------------------------------------------------------------------
 -- organizations
 -- ---------------------------------------------------------------------------
@@ -57,6 +45,18 @@ create table public.organization_members (
 
 create index organization_members_user_id_idx on public.organization_members (user_id);
 create index organization_members_organization_id_idx on public.organization_members (organization_id);
+
+create or replace function public.user_organization_ids()
+returns setof uuid
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select organization_id
+  from public.organization_members
+  where user_id = auth.uid();
+$$;
 
 -- ---------------------------------------------------------------------------
 -- business_contexts
