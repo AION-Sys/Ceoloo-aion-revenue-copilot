@@ -1,0 +1,30 @@
+"use server";
+
+import { redirect } from "next/navigation";
+import { getRepSession } from "@/lib/auth/session";
+import { getOrCreateActiveCallForLead } from "@/lib/calls/repository";
+import { getLeadById } from "@/lib/leads/repository";
+import { getSupabasePublicEnv } from "@/lib/supabase/env";
+
+export async function startCallForLead(leadId: string) {
+  const repSession = await getRepSession();
+  if (!repSession) {
+    redirect("/login?next=/");
+  }
+
+  if (!getSupabasePublicEnv().ok) {
+    redirect(`/leads/${leadId}`);
+  }
+
+  const lead = await getLeadById(leadId);
+  if (!lead || lead.organizationId !== repSession.organizationId) {
+    redirect("/");
+  }
+
+  const call = await getOrCreateActiveCallForLead(leadId, repSession.userId);
+  if (!call) {
+    redirect(`/leads/${leadId}`);
+  }
+
+  redirect(`/calls/${call.id}`);
+}

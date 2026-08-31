@@ -318,3 +318,35 @@ h1 {
 .brief-questions li + li {
   margin-top: 0.5rem;
 }
+
+.call-actions {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.guidance-panel {
+  display: grid;
+  gap: 1rem;
+}
+
+.guidance-inputs textarea {
+  width: 100%;
+  padding: 0.75rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid #2a3647;
+  background: #111822;
+  color: #e7ecf3;
+  resize: vertical;
+  min-height: 5rem;
+  font: inherit;
+}
+
+.guidance-copy {
+  margin: 0;
+  color: #b8c4d0;
+  line-height: 1.5;
+}
+
+.guidance-highlight {
+  border-color: #3b82f6;
+}
