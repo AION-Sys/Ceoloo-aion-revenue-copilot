@@ -1,4 +1,5 @@
 import type { PreCallBrief } from "@/lib/intelligence/pre-call";
+import { startCallForLead } from "@/app/leads/[id]/actions";
 
 type PreCallBriefPanelProps = {
   brief: PreCallBrief;
@@ -52,6 +53,12 @@ export function PreCallBriefPanel({ brief }: PreCallBriefPanelProps) {
           ))}
         </ol>
       </article>
+
+      <form action={startCallForLead.bind(null, lead.id)} className="call-actions">
+        <button className="button" type="submit">
+          Start call
+        </button>
+      </form>
     </section>
   );
 }

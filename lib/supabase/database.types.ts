@@ -90,5 +90,9 @@ export type Database = {
       call_outcomes: { Row: CallOutcomeRow; Insert: Omit<CallOutcomeRow, "id" | "created_at"> & Partial<Pick<CallOutcomeRow, "id" | "created_at">>; Update: Partial<CallOutcomeRow> };
       event_log: { Row: EventLogRow; Insert: Omit<EventLogRow, "id" | "created_at"> & Partial<Pick<EventLogRow, "id" | "created_at">>; Update: Partial<EventLogRow> };
     };
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
+    Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
   };
 };
