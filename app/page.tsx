@@ -1,4 +1,8 @@
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { RepSessionBar } from "@/components/RepSessionBar";
 import { WorkflowPhase } from "@/components/WorkflowPhase";
+import { getAuthenticatedUser, getRepSession } from "@/lib/auth/session";
 
 const phases = [
   {
@@ -34,9 +38,19 @@ const phases = [
   },
 ] as const;
 
-export default function HomePage() {
+export default async function HomePage() {
+  const repSession = await getRepSession();
+
+  if (!repSession) {
+    const user = await getAuthenticatedUser();
+    if (user) {
+      redirect("/no-organization");
+    }
+  }
+
   return (
     <main className="page">
+      {repSession ? <RepSessionBar session={repSession} /> : null}
       <header className="header">
         <p className="eyebrow">AION · Mission 002</p>
         <h1>Revenue Conversion Copilot</h1>
@@ -44,11 +58,20 @@ export default function HomePage() {
           AI-assisted sales workspace — pre-call → call → post-call
         </p>
       </header>
-      <section className="grid">
-        {phases.map((phase) => (
-          <WorkflowPhase key={phase.id} title={phase.title} items={phase.items} />
-        ))}
-      </section>
+      {!repSession ? (
+        <section className="cta-panel">
+          <p>Sign in to access lead and call workflows protected by organization-scoped RLS.</p>
+          <Link className="button" href="/login?next=/">
+            Rep sign in
+          </Link>
+        </section>
+      ) : (
+        <section className="grid">
+          {phases.map((phase) => (
+            <WorkflowPhase key={phase.id} title={phase.title} items={phase.items} />
+          ))}
+        </section>
+      )}
     </main>
   );
 }
