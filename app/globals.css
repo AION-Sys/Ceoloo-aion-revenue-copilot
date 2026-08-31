@@ -350,3 +350,74 @@ h1 {
 .guidance-highlight {
   border-color: #3b82f6;
 }
+
+.outcome-panel {
+  display: grid;
+  gap: 1rem;
+}
+
+.outcome-panel select,
+.outcome-panel textarea,
+.outcome-row input,
+.outcome-objection input[type="text"] {
+  width: 100%;
+  padding: 0.75rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid #2a3647;
+  background: #111822;
+  color: #e7ecf3;
+  font: inherit;
+}
+
+.outcome-panel textarea {
+  resize: vertical;
+  min-height: 5rem;
+}
+
+.outcome-list {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.outcome-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.outcome-row input {
+  flex: 1 1 12rem;
+}
+
+.outcome-objection {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0.85rem;
+  border-radius: 10px;
+  border: 1px solid #2a3647;
+  background: #111822;
+}
+
+.outcome-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.outcome-checkbox input {
+  width: auto;
+}
+
+.outcome-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.outcome-success ul {
+  margin: 0.75rem 0 1rem;
+  padding-left: 1.1rem;
+  color: #b8c4d0;
+}

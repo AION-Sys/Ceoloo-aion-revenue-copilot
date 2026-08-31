@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import type { DuringCallGuidance } from "@/lib/intelligence/during-call";
 
@@ -117,6 +118,12 @@ export function DuringCallGuidancePanel({
         <h2>Qualification</h2>
         <p className="guidance-copy">{guidance.qualificationPrompt}</p>
       </article>
+
+      <div className="call-actions">
+        <Link className="button" href={`/calls/${callId}/outcome`}>
+          End call &amp; capture outcome
+        </Link>
+      </div>
     </section>
   );
 }
