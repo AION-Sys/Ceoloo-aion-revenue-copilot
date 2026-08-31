@@ -1,0 +1,48 @@
+-- Optional seed for local/preview testing after migration.
+-- Replace USER_ID with the auth.users id of your test rep.
+
+-- Example (uncomment and edit after creating a Supabase Auth user):
+--
+-- insert into public.organizations (id, name)
+-- values ('11111111-1111-4111-8111-111111111111', 'Demo Contractor Co');
+--
+-- insert into public.organization_members (organization_id, user_id, role)
+-- values (
+--   '11111111-1111-4111-8111-111111111111',
+--   '<YOUR_AUTH_USER_UUID>',
+--   'rep'
+-- );
+--
+-- insert into public.business_contexts (
+--   id,
+--   organization_id,
+--   industry,
+--   services,
+--   likely_pains,
+--   relevant_offer
+-- ) values (
+--   '22222222-2222-4222-8222-222222222222',
+--   '11111111-1111-4111-8111-111111111111',
+--   'home-services',
+--   '["HVAC repair", "maintenance"]'::jsonb,
+--   '["slow lead response", "inconsistent follow-up"]'::jsonb,
+--   'conversion copilot trial'
+-- );
+--
+-- insert into public.leads (
+--   id,
+--   organization_id,
+--   business_context_id,
+--   company_name,
+--   contact_name,
+--   source,
+--   status
+-- ) values (
+--   '33333333-3333-4333-8333-333333333333',
+--   '11111111-1111-4111-8111-111111111111',
+--   '22222222-2222-4222-8222-222222222222',
+--   'Acme HVAC',
+--   'Jordan Lee',
+--   'outbound',
+--   'new'
+-- );

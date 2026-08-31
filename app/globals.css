@@ -221,3 +221,100 @@ h1 {
   border-radius: 12px;
   color: #b8c4d0;
 }
+
+.lead-list,
+.lead-list-empty {
+  margin-bottom: 1.5rem;
+}
+
+.lead-list-items {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lead-list-items li + li {
+  margin-top: 0.5rem;
+}
+
+.lead-link {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid #2a3647;
+  background: #111822;
+  color: #e7ecf3;
+  text-decoration: none;
+}
+
+.lead-link:hover {
+  border-color: #3b82f6;
+}
+
+.lead-company {
+  font-weight: 600;
+}
+
+.lead-contact,
+.lead-status,
+.muted {
+  color: #9aa8b7;
+  font-size: 0.9rem;
+}
+
+.lead-status {
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: #243247;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+}
+
+.breadcrumb {
+  margin: 0 0 1.5rem;
+  color: #9aa8b7;
+  font-size: 0.9rem;
+}
+
+.breadcrumb a {
+  color: #8eb4ff;
+  text-decoration: none;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.brief-panel {
+  display: grid;
+  gap: 1rem;
+}
+
+.brief-header {
+  margin-bottom: 0.5rem;
+}
+
+.brief-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .brief-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.brief-questions ol {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: #b8c4d0;
+}
+
+.brief-questions li + li {
+  margin-top: 0.5rem;
+}
