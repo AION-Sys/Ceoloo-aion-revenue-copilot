@@ -1,7 +1,13 @@
+import { readDemoSessionFromCookies } from "@/lib/auth/demo";
 import { mapCallRow, type Call } from "@/lib/calls/mappers";
+import {
+  getDemoCallById,
+  getOrCreateDemoCallForLead,
+} from "@/lib/demo/fixtures";
 import { getLeadById } from "@/lib/leads/repository";
 import type { Lead } from "@/lib/sales/types";
 import type { CallRow, Database } from "@/lib/supabase/database.types";
+import { getSupabasePublicEnv } from "@/lib/supabase/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 type CallInsert = Database["public"]["Tables"]["calls"]["Insert"];
@@ -28,7 +34,19 @@ function callsTable(supabase: SupabaseClient): CallsTableClient {
   return supabase.from("calls") as unknown as CallsTableClient;
 }
 
+async function isDemoDataSession(): Promise<boolean> {
+  return Boolean(await readDemoSessionFromCookies());
+}
+
 export async function getCallById(callId: string): Promise<Call | null> {
+  if (await isDemoDataSession()) {
+    return getDemoCallById(callId);
+  }
+
+  if (!getSupabasePublicEnv().ok) {
+    return null;
+  }
+
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase.from("calls").select("*").eq("id", callId).maybeSingle();
 
@@ -59,6 +77,14 @@ export async function getOrCreateActiveCallForLead(
   leadId: string,
   repUserId: string,
 ): Promise<Call | null> {
+  if (await isDemoDataSession()) {
+    return getOrCreateDemoCallForLead(leadId);
+  }
+
+  if (!getSupabasePublicEnv().ok) {
+    return null;
+  }
+
   const supabase = await createSupabaseServerClient();
   const calls = callsTable(supabase);
 

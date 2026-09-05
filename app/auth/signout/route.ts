@@ -1,4 +1,8 @@
 import { NextResponse } from "next/server";
+import {
+  DEMO_SESSION_COOKIE,
+  demoSessionCookieOptions,
+} from "@/lib/auth/demo";
 import { getSupabasePublicEnv } from "@/lib/supabase/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -10,5 +14,12 @@ export async function POST(request: Request) {
     await supabase.auth.signOut();
   }
 
-  return NextResponse.redirect(new URL("/login", requestUrl.origin), { status: 303 });
+  const response = NextResponse.redirect(new URL("/login", requestUrl.origin), {
+    status: 303,
+  });
+  response.cookies.set(DEMO_SESSION_COOKIE, "", {
+    ...demoSessionCookieOptions(0),
+    maxAge: 0,
+  });
+  return response;
 }

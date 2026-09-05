@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { readDemoSessionFromCookies } from "@/lib/auth/demo";
 import { getRepSession } from "@/lib/auth/session";
 import { getPreCallBriefForLead } from "@/lib/intelligence/brief";
 import { getSupabasePublicEnv } from "@/lib/supabase/env";
@@ -8,7 +9,8 @@ type RouteContext = {
 };
 
 export async function GET(_request: Request, context: RouteContext) {
-  if (!getSupabasePublicEnv().ok) {
+  const demoSession = await readDemoSessionFromCookies();
+  if (!getSupabasePublicEnv().ok && !demoSession) {
     return NextResponse.json(
       { error: "Supabase is not configured." },
       { status: 503 },

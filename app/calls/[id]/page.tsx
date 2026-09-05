@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { DuringCallGuidancePanel } from "@/components/DuringCallGuidancePanel";
 import { RepSessionBar } from "@/components/RepSessionBar";
+import { readDemoSessionFromCookies } from "@/lib/auth/demo";
 import { getRepSession } from "@/lib/auth/session";
 import { getCallWithLead } from "@/lib/calls/repository";
 import { getBusinessContextForLead } from "@/lib/leads/repository";
@@ -18,7 +19,8 @@ export default async function CallGuidancePage({ params }: CallGuidancePageProps
     redirect("/login?next=/");
   }
 
-  if (!getSupabasePublicEnv().ok) {
+  const demoSession = await readDemoSessionFromCookies();
+  if (!getSupabasePublicEnv().ok && !demoSession) {
     return (
       <main className="page">
         <RepSessionBar session={repSession} />

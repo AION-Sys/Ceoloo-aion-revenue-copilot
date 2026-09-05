@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { LoginForm } from "@/components/LoginForm";
+import {
+  getDemoCredentials,
+  isDemoAuthEnabled,
+} from "@/lib/auth/demo";
 import { getAuthenticatedUser, getRepSession } from "@/lib/auth/session";
 
 type LoginPageProps = {
@@ -21,6 +25,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     redirect("/no-organization");
   }
 
+  const demoEnabled = isDemoAuthEnabled();
+  const demoCredentials = demoEnabled ? getDemoCredentials() : null;
+
   return (
     <main className="page auth-page">
       <header className="header">
@@ -28,9 +35,27 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         <h1>Rep sign in</h1>
         <p className="subtitle">Access the Revenue Conversion Copilot workspace.</p>
       </header>
-      <LoginForm nextPath={nextPath} initialError={params.error} />
+      {demoCredentials ? (
+        <section className="demo-creds" aria-label="Preview rep credentials">
+          <p className="demo-creds-label">Preview rep (demo mode)</p>
+          <p>
+            <span className="demo-creds-key">Email</span> {demoCredentials.email}
+          </p>
+          <p>
+            <span className="demo-creds-key">Password</span> {demoCredentials.password}
+          </p>
+        </section>
+      ) : null}
+      <LoginForm
+        nextPath={nextPath}
+        initialError={params.error}
+        demoEmail={demoCredentials?.email}
+        demoPassword={demoCredentials?.password}
+      />
       <p className="auth-footnote">
-        Need access? Contact your organization admin to provision a rep account.
+        {demoCredentials
+          ? "Demo mode is active until Supabase Auth is configured. Turn off with ENABLE_DEMO_AUTH=false."
+          : "Need access? Contact your organization admin to provision a rep account."}
       </p>
       <p className="auth-footnote">
         <Link href="/">Back to overview</Link>

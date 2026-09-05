@@ -212,6 +212,34 @@ h1 {
   color: #8eb4ff;
 }
 
+.demo-creds {
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.1rem;
+  border: 1px dashed #3a4a5f;
+  border-radius: 12px;
+  background: #121a24;
+  color: #b8c4d0;
+  font-size: 0.9rem;
+}
+
+.demo-creds p {
+  margin: 0.35rem 0 0;
+}
+
+.demo-creds-label {
+  margin: 0 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.7rem;
+  color: #7b8a9a;
+}
+
+.demo-creds-key {
+  display: inline-block;
+  min-width: 4.5rem;
+  color: #7b8a9a;
+}
+
 .cta-panel {
   display: grid;
   gap: 1rem;
