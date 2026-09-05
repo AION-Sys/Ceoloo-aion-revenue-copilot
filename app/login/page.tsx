@@ -54,7 +54,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       />
       <p className="auth-footnote">
         {demoCredentials
-          ? "Demo mode is active until Supabase Auth is configured. Turn off with ENABLE_DEMO_AUTH=false."
+          ? "Demo mode is on for MVP testing. Disable with ENABLE_DEMO_AUTH=false when Supabase Auth is ready."
           : "Need access? Contact your organization admin to provision a rep account."}
       </p>
       <p className="auth-footnote">

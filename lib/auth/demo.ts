@@ -1,6 +1,5 @@
 import { cookies } from "next/headers";
 import type { RepSession } from "@/lib/auth/types";
-import { getSupabasePublicEnv } from "@/lib/supabase/env";
 
 /** Cookie set after a successful demo rep sign-in. Edge-safe opaque token. */
 export const DEMO_SESSION_COOKIE = "aion_demo_rep";
@@ -16,19 +15,20 @@ export const DEMO_REP_EMAIL_DEFAULT = "rep@demo.local";
 export const DEMO_REP_PASSWORD_DEFAULT = "demo-rep-password";
 
 /**
- * Demo auth is on when explicitly enabled, or automatically when Supabase
- * public env is missing (so Vercel preview/prod can be tested before DB is wired).
- * Set ENABLE_DEMO_AUTH=false to force it off.
+ * Demo auth is on by default for MVP validation testing.
+ * Set ENABLE_DEMO_AUTH=false to disable once real Supabase Auth is the only path.
+ * Explicit true/1 also enables it.
  */
 export function isDemoAuthEnabled(): boolean {
   const flag = process.env.ENABLE_DEMO_AUTH?.trim().toLowerCase();
-  if (flag === "true" || flag === "1") {
-    return true;
-  }
   if (flag === "false" || flag === "0") {
     return false;
   }
-  return !getSupabasePublicEnv().ok;
+  if (flag === "true" || flag === "1") {
+    return true;
+  }
+  // Default on for preview/MVP testing (including when Supabase is configured).
+  return true;
 }
 
 export function getDemoCredentials(): { email: string; password: string } {

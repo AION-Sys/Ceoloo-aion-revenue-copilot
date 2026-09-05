@@ -12,17 +12,13 @@ afterEach(() => {
 });
 
 describe("demo auth", () => {
-  it("auto-enables when Supabase public env is missing", () => {
+  it("is enabled by default for MVP testing", () => {
     vi.stubEnv("ENABLE_DEMO_AUTH", "");
-    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "");
-    vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "");
     expect(isDemoAuthEnabled()).toBe(true);
   });
 
-  it("respects ENABLE_DEMO_AUTH=false even without Supabase", () => {
+  it("respects ENABLE_DEMO_AUTH=false", () => {
     vi.stubEnv("ENABLE_DEMO_AUTH", "false");
-    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "");
-    vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "");
     expect(isDemoAuthEnabled()).toBe(false);
   });
 
