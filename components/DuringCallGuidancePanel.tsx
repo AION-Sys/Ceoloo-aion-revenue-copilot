@@ -1,14 +1,17 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   createDiscoveryChecklist,
   QUALIFICATION_OPTIONS,
-  syncDiscoveryChecklist,
   type DiscoveryChecklistItem,
 } from "@/lib/intelligence/call-workspace";
 import type { DuringCallGuidance } from "@/lib/intelligence/during-call";
 import type { QualificationState } from "@/lib/sales/types";
+import { cn } from "@/lib/utils";
 
 type DuringCallGuidancePanelProps = {
   callId: string;
@@ -58,156 +61,214 @@ export function DuringCallGuidancePanel({
             objection: objection.trim() || undefined,
           }),
         });
-
         if (!response.ok) {
-          const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-          throw new Error(payload?.error ?? "Unable to refresh guidance.");
+          throw new Error("Unable to refresh guidance.");
         }
-
         const payload = (await response.json()) as { guidance: DuringCallGuidance };
         setGuidance(payload.guidance);
-        setChecklist((previous) => syncDiscoveryChecklist(payload.guidance.checklist, previous));
+        setChecklist((items) =>
+          syncChecklist(items, createDiscoveryChecklist(payload.guidance.checklist)),
+        );
       } catch (refreshError) {
-        setError(refreshError instanceof Error ? refreshError.message : "Unable to refresh guidance.");
+        setError(
+          refreshError instanceof Error
+            ? refreshError.message
+            : "Unable to refresh guidance.",
+        );
       }
     });
   }
 
   return (
-    <section className="guidance-panel">
-      <header className="brief-header">
-        <p className="eyebrow">During call</p>
-        <h1>{companyName}</h1>
-        <p className="subtitle">Live guidance — checklist, objections, next-best action</p>
+    <section className="space-y-4">
+      <header>
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          During call
+        </p>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight">{companyName}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Live guidance — checklist, objections, next-best action
+        </p>
       </header>
 
-      <article className="card guidance-inputs">
-        <h2>Conversation context</h2>
-        <label className="field">
-          <span>Live notes (optional)</span>
-          <textarea
-            rows={3}
-            value={repNotes}
-            onChange={(event) => setRepNotes(event.target.value)}
-            placeholder="What you've heard so far…"
-          />
-        </label>
-        <label className="field">
-          <span>Objection detected (optional)</span>
-          <input
-            type="text"
-            value={objection}
-            onChange={(event) => setObjection(event.target.value)}
-            placeholder="e.g. too expensive, bad timing"
-          />
-        </label>
-        <button className="button" type="button" onClick={refreshGuidance} disabled={isPending}>
-          {isPending ? "Refreshing…" : "Refresh guidance"}
-        </button>
-        {error ? <p className="form-error">{error}</p> : null}
-      </article>
+      <Card>
+        <CardHeader>
+          <CardTitle>Conversation context</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <label className="block space-y-1.5">
+            <span className="text-xs text-muted-foreground">Live notes (optional)</span>
+            <textarea
+              className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              rows={3}
+              value={repNotes}
+              onChange={(event) => setRepNotes(event.target.value)}
+              placeholder="What you've heard so far…"
+            />
+          </label>
+          <label className="block space-y-1.5">
+            <span className="text-xs text-muted-foreground">
+              Objection detected (optional)
+            </span>
+            <Input
+              type="text"
+              value={objection}
+              onChange={(event) => setObjection(event.target.value)}
+              placeholder="e.g. too expensive, bad timing"
+            />
+          </label>
+          <Button type="button" onClick={refreshGuidance} disabled={isPending}>
+            {isPending ? "Refreshing…" : "Refresh guidance"}
+          </Button>
+          {error ? <p className="text-sm text-destructive">{error}</p> : null}
+        </CardContent>
+      </Card>
 
-      <article className="card">
-        <h2>Script cue</h2>
-        <p className="guidance-copy">{guidance.scriptCue}</p>
-      </article>
+      <Card>
+        <CardHeader>
+          <CardTitle>Script cue</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm leading-relaxed">{guidance.scriptCue}</p>
+        </CardContent>
+      </Card>
 
-      <article className="card discovery-checklist-card">
-        <div className="discovery-checklist-header">
-          <h2>Discovery checklist</h2>
-          <p className="discovery-checklist-progress">
+      <Card>
+        <CardHeader className="flex-row items-center justify-between space-y-0">
+          <CardTitle>Discovery checklist</CardTitle>
+          <p className="text-xs text-muted-foreground">
             {checkedCount}/{checklist.length} covered
           </p>
-        </div>
-        <ul className="discovery-checklist">
-          {checklist.map((item) => (
-            <li key={item.id} className="discovery-checklist-item">
-              <label className="discovery-check-row">
-                <input
-                  type="checkbox"
-                  checked={item.checked}
-                  onChange={(event) =>
-                    updateChecklistItem(item.id, { checked: event.target.checked })
-                  }
-                />
-                <span>{item.label}</span>
-              </label>
-              <label className="field discovery-notes-field">
-                <span className="sr-only">Notes for {item.label}</span>
-                <input
+        </CardHeader>
+        <CardContent>
+          <ul className="space-y-3">
+            {checklist.map((item) => (
+              <li key={item.id} className="space-y-2 rounded-lg border p-3">
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    className="rounded border"
+                    checked={item.checked}
+                    onChange={(event) =>
+                      updateChecklistItem(item.id, { checked: event.target.checked })
+                    }
+                  />
+                  <span>{item.label}</span>
+                </label>
+                <Input
                   type="text"
                   value={item.notes}
                   onChange={(event) =>
                     updateChecklistItem(item.id, { notes: event.target.value })
                   }
                   placeholder="Fill in what you learned…"
+                  aria-label={`Notes for ${item.label}`}
                 />
-              </label>
-            </li>
-          ))}
-        </ul>
-      </article>
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+      </Card>
 
-      <div className="brief-grid brief-grid-two">
-        <article className="card">
-          <h2>Next-best question</h2>
-          <p className="guidance-copy">{guidance.nextBestQuestion}</p>
-        </article>
-
-        <article className="card">
-          <h2>Next-best action</h2>
-          <p className="guidance-copy">{guidance.nextBestAction}</p>
-        </article>
+      <div className="grid gap-3 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Next-best question</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm leading-relaxed">{guidance.nextBestQuestion}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Next-best action</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm leading-relaxed">{guidance.nextBestAction}</p>
+          </CardContent>
+        </Card>
       </div>
 
       {guidance.objectionReframe ? (
-        <article className="card guidance-highlight">
-          <h2>Suggested reframe</h2>
-          <p className="guidance-copy">{guidance.objectionReframe}</p>
-        </article>
+        <Card className="border-ai/30">
+          <CardHeader>
+            <CardTitle>Suggested reframe</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm leading-relaxed">{guidance.objectionReframe}</p>
+          </CardContent>
+        </Card>
       ) : null}
 
-      <article className="card qualification-card">
-        <h2>Qualification</h2>
-        <p className="guidance-copy">{guidance.qualificationPrompt}</p>
-        <fieldset className="qualification-fieldset">
-          <legend className="sr-only">Call qualification</legend>
-          <div className="qualification-options" role="radiogroup" aria-label="Qualification">
-            {QUALIFICATION_OPTIONS.map((option) => {
-              const selected = qualification === option.value;
-              return (
-                <label
-                  key={option.value}
-                  className={`qualification-option${selected ? " is-selected" : ""}`}
-                >
-                  <input
-                    type="radio"
-                    name="qualification"
-                    value={option.value}
-                    checked={selected}
-                    onChange={() => setQualification(option.value)}
-                  />
-                  <span className="qualification-option-label">{option.label}</span>
-                  <span className="qualification-option-description">{option.description}</span>
-                </label>
-              );
-            })}
-          </div>
-        </fieldset>
-        <label className="field">
-          <span>Why this qualification?</span>
-          <textarea
-            rows={2}
-            value={qualificationNotes}
-            onChange={(event) => setQualificationNotes(event.target.value)}
-            placeholder="Budget, timeline, authority, need…"
-          />
-        </label>
-        <p className="qualification-status" aria-live="polite">
-          Current: <strong>{qualification}</strong>
-          {qualificationNotes.trim() ? ` — ${qualificationNotes.trim()}` : null}
-        </p>
-      </article>
+      <Card>
+        <CardHeader>
+          <CardTitle>Qualification</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">{guidance.qualificationPrompt}</p>
+          <fieldset>
+            <legend className="sr-only">Call qualification</legend>
+            <div
+              className="grid gap-2 sm:grid-cols-2"
+              role="radiogroup"
+              aria-label="Qualification"
+            >
+              {QUALIFICATION_OPTIONS.map((option) => {
+                const selected = qualification === option.value;
+                return (
+                  <label
+                    key={option.value}
+                    className={cn(
+                      "cursor-pointer rounded-lg border p-3 transition-colors",
+                      selected && "border-primary bg-muted/50",
+                    )}
+                  >
+                    <input
+                      type="radio"
+                      className="sr-only"
+                      name="qualification"
+                      value={option.value}
+                      checked={selected}
+                      onChange={() => setQualification(option.value)}
+                    />
+                    <span className="block text-sm font-medium">{option.label}</span>
+                    <span className="mt-1 block text-xs text-muted-foreground">
+                      {option.description}
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+          </fieldset>
+          <label className="block space-y-1.5">
+            <span className="text-xs text-muted-foreground">Why this qualification?</span>
+            <textarea
+              className="flex min-h-[64px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              rows={2}
+              value={qualificationNotes}
+              onChange={(event) => setQualificationNotes(event.target.value)}
+              placeholder="Budget, timeline, authority, need…"
+            />
+          </label>
+          <p className="text-xs text-muted-foreground" aria-live="polite">
+            Current: <span className="font-medium text-foreground">{qualification}</span>
+            {qualificationNotes.trim() ? ` — ${qualificationNotes.trim()}` : null}
+          </p>
+        </CardContent>
+      </Card>
     </section>
   );
+}
+
+function syncChecklist(
+  current: DiscoveryChecklistItem[],
+  next: DiscoveryChecklistItem[],
+): DiscoveryChecklistItem[] {
+  const notesByLabel = new Map(
+    current.map((item) => [item.label, { checked: item.checked, notes: item.notes }]),
+  );
+  return next.map((item) => {
+    const prior = notesByLabel.get(item.label);
+    return prior ? { ...item, ...prior } : item;
+  });
 }
