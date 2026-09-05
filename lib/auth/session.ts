@@ -1,3 +1,7 @@
+import {
+  getDemoRepSession,
+  readDemoSessionFromCookies,
+} from "@/lib/auth/demo";
 import type { OrganizationMembershipRow, RepRole, RepSession } from "@/lib/auth/types";
 import { getSupabasePublicEnv } from "@/lib/supabase/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -26,6 +30,11 @@ export function isRepRole(value: string): value is RepRole {
 }
 
 export async function getRepSession(): Promise<RepSession | null> {
+  const demoSession = await readDemoSessionFromCookies();
+  if (demoSession) {
+    return demoSession;
+  }
+
   if (!getSupabasePublicEnv().ok) {
     return null;
   }
@@ -60,6 +69,14 @@ export async function getRepSession(): Promise<RepSession | null> {
 }
 
 export async function getAuthenticatedUser() {
+  const demoSession = await readDemoSessionFromCookies();
+  if (demoSession) {
+    return {
+      id: demoSession.userId,
+      email: demoSession.email,
+    };
+  }
+
   if (!getSupabasePublicEnv().ok) {
     return null;
   }
@@ -76,3 +93,5 @@ export async function getAuthenticatedUser() {
 
   return user;
 }
+
+export { getDemoRepSession };

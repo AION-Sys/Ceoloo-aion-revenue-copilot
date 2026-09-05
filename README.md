@@ -46,6 +46,17 @@ npm install
 npm run dev
 ```
 
+### Preview / Vercel testing without Supabase
+
+**Demo rep auth is on by default** for MVP testing:
+
+| Field | Value |
+|-------|--------|
+| Email | `rep@demo.local` |
+| Password | `demo-rep-password` |
+
+Sign in at `/login`, then open the Acme HVAC lead for pre-call → call guidance. Set `ENABLE_DEMO_AUTH=false` once real Supabase Auth should be the only path. Optional: `npm run seed:preview` seeds the same credentials into Supabase.
+
 ## Quality Checks
 
 ```bash

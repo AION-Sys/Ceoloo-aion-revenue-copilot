@@ -1,6 +1,14 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import {
+  credentialsMatchDemo,
+  DEMO_SESSION_COOKIE,
+  DEMO_SESSION_TOKEN,
+  demoSessionCookieOptions,
+  isDemoAuthEnabled,
+} from "@/lib/auth/demo";
 import { getSupabasePublicEnv } from "@/lib/supabase/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -20,7 +28,18 @@ export async function signInWithPassword(
     return { error: "Email and password are required." };
   }
 
+  if (credentialsMatchDemo(email, password)) {
+    const cookieStore = await cookies();
+    cookieStore.set(DEMO_SESSION_COOKIE, DEMO_SESSION_TOKEN, demoSessionCookieOptions());
+    redirect(nextPath.startsWith("/") ? nextPath : "/");
+  }
+
   if (!getSupabasePublicEnv().ok) {
+    if (isDemoAuthEnabled()) {
+      return {
+        error: "Invalid demo credentials. Use the preview rep email and password shown below.",
+      };
+    }
     return { error: "Supabase is not configured for this environment." };
   }
 

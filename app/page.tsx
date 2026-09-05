@@ -5,7 +5,6 @@ import { RepSessionBar } from "@/components/RepSessionBar";
 import { WorkflowPhase } from "@/components/WorkflowPhase";
 import { getAuthenticatedUser, getRepSession } from "@/lib/auth/session";
 import { listLeadsForOrganization } from "@/lib/leads/repository";
-import { getSupabasePublicEnv } from "@/lib/supabase/env";
 
 const phases = [
   {
@@ -51,10 +50,9 @@ export default async function HomePage() {
     }
   }
 
-  const leads =
-    repSession && getSupabasePublicEnv().ok
-      ? await listLeadsForOrganization(repSession.organizationId)
-      : [];
+  const leads = repSession
+    ? await listLeadsForOrganization(repSession.organizationId)
+    : [];
 
   return (
     <main className="page">

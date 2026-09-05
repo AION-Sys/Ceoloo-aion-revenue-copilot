@@ -6,11 +6,18 @@ import { signInWithPassword, type SignInState } from "@/app/login/actions";
 type LoginFormProps = {
   nextPath: string;
   initialError?: string;
+  demoEmail?: string;
+  demoPassword?: string;
 };
 
 const initialState: SignInState = {};
 
-export function LoginForm({ nextPath, initialError }: LoginFormProps) {
+export function LoginForm({
+  nextPath,
+  initialError,
+  demoEmail,
+  demoPassword,
+}: LoginFormProps) {
   const [state, formAction, pending] = useActionState(signInWithPassword, {
     ...initialState,
     error: initialError,
@@ -23,6 +30,7 @@ export function LoginForm({ nextPath, initialError }: LoginFormProps) {
         <span>Email</span>
         <input
           autoComplete="email"
+          defaultValue={demoEmail}
           name="email"
           required
           type="email"
@@ -32,6 +40,7 @@ export function LoginForm({ nextPath, initialError }: LoginFormProps) {
         <span>Password</span>
         <input
           autoComplete="current-password"
+          defaultValue={demoPassword}
           name="password"
           required
           type="password"

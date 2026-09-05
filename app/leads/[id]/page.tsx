@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { PreCallBriefPanel } from "@/components/PreCallBriefPanel";
 import { RepSessionBar } from "@/components/RepSessionBar";
+import { readDemoSessionFromCookies } from "@/lib/auth/demo";
 import { getRepSession } from "@/lib/auth/session";
 import { getPreCallBriefForLead } from "@/lib/intelligence/brief";
 import { getSupabasePublicEnv } from "@/lib/supabase/env";
@@ -16,7 +17,8 @@ export default async function LeadBriefPage({ params }: LeadBriefPageProps) {
     redirect("/login?next=/");
   }
 
-  if (!getSupabasePublicEnv().ok) {
+  const demoSession = await readDemoSessionFromCookies();
+  if (!getSupabasePublicEnv().ok && !demoSession) {
     return (
       <main className="page">
         <RepSessionBar session={repSession} />

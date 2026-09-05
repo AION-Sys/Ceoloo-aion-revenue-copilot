@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { hasDemoSessionCookie } from "@/lib/auth/demo";
 import { isProtectedPath } from "@/lib/auth/routes";
 import type { Database } from "@/lib/supabase/database.types";
 import { getSupabasePublicEnv } from "@/lib/supabase/env";
@@ -7,9 +8,20 @@ import { getSupabasePublicEnv } from "@/lib/supabase/env";
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
   const env = getSupabasePublicEnv();
+  const pathname = request.nextUrl.pathname;
+  const hasDemoSession = hasDemoSessionCookie(request.cookies);
 
   if (!env.ok) {
-    if (isProtectedPath(request.nextUrl.pathname) && request.nextUrl.pathname !== "/") {
+    if (hasDemoSession && pathname === "/login") {
+      const nextPath = request.nextUrl.searchParams.get("next") ?? "/";
+      return NextResponse.redirect(new URL(nextPath.startsWith("/") ? nextPath : "/", request.url));
+    }
+
+    if (
+      !hasDemoSession &&
+      isProtectedPath(pathname) &&
+      pathname !== "/"
+    ) {
       const loginUrl = request.nextUrl.clone();
       loginUrl.pathname = "/login";
       loginUrl.searchParams.set("next", request.nextUrl.pathname);
@@ -39,14 +51,14 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const pathname = request.nextUrl.pathname;
+  const isSignedIn = Boolean(user) || hasDemoSession;
 
-  if (user && pathname === "/login") {
+  if (isSignedIn && pathname === "/login") {
     const nextPath = request.nextUrl.searchParams.get("next") ?? "/";
     return NextResponse.redirect(new URL(nextPath.startsWith("/") ? nextPath : "/", request.url));
   }
 
-  if (!user && isProtectedPath(pathname) && pathname !== "/") {
+  if (!isSignedIn && isProtectedPath(pathname) && pathname !== "/") {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
     loginUrl.searchParams.set("next", pathname);

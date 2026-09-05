@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { readDemoSessionFromCookies } from "@/lib/auth/demo";
 import { getRepSession } from "@/lib/auth/session";
 import { getOrCreateActiveCallForLead } from "@/lib/calls/repository";
 import { getLeadById } from "@/lib/leads/repository";
@@ -12,7 +13,8 @@ export async function startCallForLead(leadId: string) {
     redirect("/login?next=/");
   }
 
-  if (!getSupabasePublicEnv().ok) {
+  const demoSession = await readDemoSessionFromCookies();
+  if (!getSupabasePublicEnv().ok && !demoSession) {
     redirect(`/leads/${leadId}`);
   }
 
