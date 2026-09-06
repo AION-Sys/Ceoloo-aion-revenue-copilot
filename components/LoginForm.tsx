@@ -2,6 +2,8 @@
 
 import { useActionState } from "react";
 import { signInWithPassword, type SignInState } from "@/app/login/actions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type LoginFormProps = {
   nextPath: string;
@@ -24,11 +26,11 @@ export function LoginForm({
   });
 
   return (
-    <form className="auth-form" action={formAction}>
+    <form className="space-y-4" action={formAction}>
       <input type="hidden" name="next" value={nextPath} />
-      <label className="field">
-        <span>Email</span>
-        <input
+      <label className="block space-y-1.5">
+        <span className="text-xs font-medium text-muted-foreground">Email</span>
+        <Input
           autoComplete="email"
           defaultValue={demoEmail}
           name="email"
@@ -36,9 +38,9 @@ export function LoginForm({
           type="email"
         />
       </label>
-      <label className="field">
-        <span>Password</span>
-        <input
+      <label className="block space-y-1.5">
+        <span className="text-xs font-medium text-muted-foreground">Password</span>
+        <Input
           autoComplete="current-password"
           defaultValue={demoPassword}
           name="password"
@@ -46,10 +48,12 @@ export function LoginForm({
           type="password"
         />
       </label>
-      {state.error ? <p className="form-error">{state.error}</p> : null}
-      <button className="button" disabled={pending} type="submit">
+      {state.error ? (
+        <p className="text-sm text-destructive">{state.error}</p>
+      ) : null}
+      <Button className="w-full" disabled={pending} type="submit">
         {pending ? "Signing in…" : "Sign in"}
-      </button>
+      </Button>
     </form>
   );
 }

@@ -13,8 +13,10 @@ export async function middleware(request: NextRequest) {
 
   if (!env.ok) {
     if (hasDemoSession && pathname === "/login") {
-      const nextPath = request.nextUrl.searchParams.get("next") ?? "/";
-      return NextResponse.redirect(new URL(nextPath.startsWith("/") ? nextPath : "/", request.url));
+      const nextPath = request.nextUrl.searchParams.get("next") ?? "/dashboard";
+      return NextResponse.redirect(
+        new URL(nextPath.startsWith("/") ? nextPath : "/dashboard", request.url),
+      );
     }
 
     if (
@@ -54,8 +56,10 @@ export async function middleware(request: NextRequest) {
   const isSignedIn = Boolean(user) || hasDemoSession;
 
   if (isSignedIn && pathname === "/login") {
-    const nextPath = request.nextUrl.searchParams.get("next") ?? "/";
-    return NextResponse.redirect(new URL(nextPath.startsWith("/") ? nextPath : "/", request.url));
+    const nextPath = request.nextUrl.searchParams.get("next") ?? "/dashboard";
+    return NextResponse.redirect(
+      new URL(nextPath.startsWith("/") ? nextPath : "/dashboard", request.url),
+    );
   }
 
   if (!isSignedIn && isProtectedPath(pathname) && pathname !== "/") {

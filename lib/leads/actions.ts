@@ -10,7 +10,7 @@ import { getSupabasePublicEnv } from "@/lib/supabase/env";
 export async function startCallForLead(leadId: string) {
   const repSession = await getRepSession();
   if (!repSession) {
-    redirect("/login?next=/");
+    redirect("/login?next=/dashboard");
   }
 
   const demoSession = await readDemoSessionFromCookies();
@@ -20,7 +20,7 @@ export async function startCallForLead(leadId: string) {
 
   const lead = await getLeadById(leadId);
   if (!lead || lead.organizationId !== repSession.organizationId) {
-    redirect("/");
+    redirect("/dashboard");
   }
 
   const call = await getOrCreateActiveCallForLead(leadId, repSession.userId);
@@ -28,5 +28,5 @@ export async function startCallForLead(leadId: string) {
     redirect(`/leads/${leadId}`);
   }
 
-  redirect(`/calls/${call.id}`);
+  redirect(`/calls/${call.id}/live`);
 }

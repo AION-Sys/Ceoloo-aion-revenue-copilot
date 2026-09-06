@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { DuringCallGuidancePanel } from "@/components/DuringCallGuidancePanel";
-import { RepSessionBar } from "@/components/RepSessionBar";
+import { EmptyState } from "@/components/primitives/EmptyState";
 import { readDemoSessionFromCookies } from "@/lib/auth/demo";
 import { getRepSession } from "@/lib/auth/session";
 import { getCallWithLead } from "@/lib/calls/repository";
@@ -10,33 +10,29 @@ import { generateDuringCallGuidance } from "@/lib/intelligence/during-call";
 import { getSupabasePublicEnv } from "@/lib/supabase/env";
 
 type CallGuidancePageProps = {
-  params: Promise<{ id: string }>;
+  params: Promise<{ callId: string }>;
 };
 
 export default async function CallGuidancePage({ params }: CallGuidancePageProps) {
   const repSession = await getRepSession();
   if (!repSession) {
-    redirect("/login?next=/");
+    redirect("/login?next=/dashboard");
   }
 
   const demoSession = await readDemoSessionFromCookies();
   if (!getSupabasePublicEnv().ok && !demoSession) {
     return (
-      <main className="page">
-        <RepSessionBar session={repSession} />
-        <section className="card">
-          <h1>During-call guidance unavailable</h1>
-          <p>Supabase is not configured. Add project URL and anon key to load call data.</p>
-          <Link className="session-link" href="/">
-            Back to workspace
-          </Link>
-        </section>
-      </main>
+      <EmptyState
+        title="During-call guidance unavailable"
+        description="Supabase is not configured. Add project URL and anon key to load call data."
+        actionLabel="Back to dashboard"
+        actionHref="/dashboard"
+      />
     );
   }
 
-  const { id } = await params;
-  const callWithLead = await getCallWithLead(id);
+  const { callId } = await params;
+  const callWithLead = await getCallWithLead(callId);
 
   if (!callWithLead || callWithLead.lead.organizationId !== repSession.organizationId) {
     notFound();
@@ -49,20 +45,33 @@ export default async function CallGuidancePage({ params }: CallGuidancePageProps
   });
 
   return (
-    <main className="page">
-      <RepSessionBar session={repSession} />
-      <p className="breadcrumb">
-        <Link href="/">Workspace</Link>
-        <span className="session-separator">/</span>
-        <Link href={`/leads/${callWithLead.lead.id}`}>{callWithLead.lead.companyName}</Link>
-        <span className="session-separator">/</span>
-        <span>Live call</span>
+    <div className="mx-auto flex max-w-5xl flex-col gap-4">
+      <p className="text-sm text-muted-foreground">
+        <Link href="/dashboard" className="hover:text-foreground">
+          Workspace
+        </Link>
+        <span className="mx-1.5">/</span>
+        <Link
+          href={`/leads/${callWithLead.lead.id}`}
+          className="hover:text-foreground"
+        >
+          {callWithLead.lead.companyName}
+        </Link>
+        <span className="mx-1.5">/</span>
+        <span className="text-foreground">Live call</span>
+        <span className="mx-2 text-border">·</span>
+        <Link
+          href={`/calls/${callId}/live`}
+          className="text-ai hover:underline"
+        >
+          Open three-panel live workspace
+        </Link>
       </p>
       <DuringCallGuidancePanel
         callId={callWithLead.call.id}
         companyName={callWithLead.lead.companyName}
         initialGuidance={initialGuidance}
       />
-    </main>
+    </div>
   );
 }

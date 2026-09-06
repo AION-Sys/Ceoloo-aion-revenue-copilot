@@ -22,7 +22,7 @@ export async function signInWithPassword(
 ): Promise<SignInState> {
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
-  const nextPath = String(formData.get("next") ?? "/").trim() || "/";
+  const nextPath = String(formData.get("next") ?? "/dashboard").trim() || "/dashboard";
 
   if (!email || !password) {
     return { error: "Email and password are required." };
@@ -31,7 +31,7 @@ export async function signInWithPassword(
   if (credentialsMatchDemo(email, password)) {
     const cookieStore = await cookies();
     cookieStore.set(DEMO_SESSION_COOKIE, DEMO_SESSION_TOKEN, demoSessionCookieOptions());
-    redirect(nextPath.startsWith("/") ? nextPath : "/");
+    redirect(nextPath.startsWith("/") ? nextPath : "/dashboard");
   }
 
   if (!getSupabasePublicEnv().ok) {
@@ -50,5 +50,5 @@ export async function signInWithPassword(
     return { error: error.message };
   }
 
-  redirect(nextPath.startsWith("/") ? nextPath : "/");
+  redirect(nextPath.startsWith("/") ? nextPath : "/dashboard");
 }
