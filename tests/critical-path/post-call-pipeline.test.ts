@@ -1,4 +1,9 @@
 import { describe, expect, it } from "vitest";
+import {
+  buildCrmEventPayload,
+  outcomeToCrmEvent,
+  qualificationToLeadStatus,
+} from "@/lib/crm/persistence";
 import { outcomeToLearningEvent, ingestLearningEvent } from "@/lib/learning/events";
 import type { CallOutcome } from "@/lib/sales/types";
 
@@ -11,6 +16,22 @@ const outcome: CallOutcome = {
   nextAction: "send proposal",
   occurredAt: new Date().toISOString(),
 };
+
+describe("post-call CRM mapping (Task 7)", () => {
+  it("maps call outcome to CRM event and lead status", () => {
+    const event = outcomeToCrmEvent(outcome);
+    expect(event.eventType).toBe("call_completed");
+    expect(event.leadId).toBe("lead-1");
+    expect(qualificationToLeadStatus(outcome.qualification)).toBe("contacted");
+  });
+
+  it("emits CRM payload contract v1 fields", () => {
+    const payload = buildCrmEventPayload(outcome);
+    expect(payload.schema_version).toBe("1");
+    expect(payload.event_type).toBe("call_completed");
+    expect(payload.outcome_id).toBe("outcome-1");
+  });
+});
 
 describe("learning events", () => {
   it("maps call outcome to learning event", () => {
