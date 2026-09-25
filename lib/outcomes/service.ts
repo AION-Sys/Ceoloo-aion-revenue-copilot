@@ -1,4 +1,5 @@
 import { getCallWithLead } from "@/lib/calls/repository";
+import { persistCallOutcome } from "@/lib/crm/persistence";
 import { getOutcomeByCallId, saveCallOutcome } from "@/lib/outcomes/repository";
 import type { PostCallOutcomeInput } from "@/lib/outcomes/validation";
 import { mapCallOutcomeRow } from "@/lib/outcomes/mappers";
@@ -40,18 +41,24 @@ export async function submitCallOutcome(
   }
 
   const existing = await getOutcomeByCallId(callId);
+  let outcome: CallOutcome;
+  let created: boolean;
+
   if (existing) {
-    return {
-      ok: true,
-      outcome: mapCallOutcomeRow(existing, callWithLead.lead.id),
-      lead: callWithLead.lead,
-      callId,
-      created: false,
-    };
+    outcome = mapCallOutcomeRow(existing, callWithLead.lead.id);
+    created = false;
+  } else {
+    const saved = await saveCallOutcome(callId, callWithLead.lead.id, input);
+    if (!saved) {
+      return { ok: false, reason: "save_failed" };
+    }
+    outcome = saved;
+    created = true;
   }
 
-  const outcome = await saveCallOutcome(callId, callWithLead.lead.id, input);
-  if (!outcome) {
+  // Task 7 — CRM persist (lead status + event_log). Learning ingest remains Task 8.
+  const crm = await persistCallOutcome(outcome, { callId });
+  if (!crm.ok) {
     return { ok: false, reason: "save_failed" };
   }
 
@@ -60,7 +67,7 @@ export async function submitCallOutcome(
     outcome,
     lead: callWithLead.lead,
     callId,
-    created: true,
+    created,
   };
 }
 
