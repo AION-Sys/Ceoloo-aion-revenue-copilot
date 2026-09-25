@@ -1,0 +1,45 @@
+---
+description: Bridge obra/superpowers session discipline onto AION product-repo governance without bypassing gates
+alwaysApply: true
+---
+
+# AION × Superpowers bridge (product repo)
+
+This product repo uses [obra/superpowers](https://github.com/obra/superpowers) as **session process**, layered under AION governance from the [AION Software Factory](https://github.com/AION-Sys/aion-software-factory).
+
+## Priority (highest first)
+
+1. Explicit human/CEO instruction for this turn
+2. Factory `AION_ENGINEERING.md` + active mission + this repo `AGENTS.md`
+3. Product `docs/PRD.md`, `docs/ARCHITECTURE.md`, task scope
+4. Factory workflows/standards (via factory repo links)
+5. Superpowers skills (if the plugin is installed)
+6. Default agent behavior
+
+## Before creative or implementation work
+
+1. Confirm MISSION-002 scope and acceptance criteria; do not invent Mission 003 product work.
+2. Prefer Superpowers `brainstorming` for new behavior; write outcomes into product docs / architecture notes, not only chat.
+3. Prefer `writing-plans` mapped to existing Architect tasks before large code changes.
+4. Prefer `test-driven-development` for logic changes; run this repo’s `npm` quality checks.
+5. Prefer `verification-before-completion` before any "done / fixed / passing" claim.
+6. Prefer `systematic-debugging` before speculative bugfixes.
+
+## Hard stops Superpowers must not override
+
+- CEO approval gates (mission scope, production deploy, release, validation close)
+- Secrets in git/logs/prompts
+- Mission 002 out-of-scope items (autonomous calling, CRM replacement, workflow builder)
+- Opening Mission 003 product work while Mission 002 validation is open
+- Expanding beyond the assigned architecture task without human approval
+
+## Role shortcuts (Builder-focused)
+
+| Role | Lean on |
+|------|---------|
+| Builder | worktrees → executing-plans/TDD → small PR in **this** repo |
+| QA | verification-before-completion → evidence vs acceptance criteria |
+| Security | systematic-debugging for investigations; no silent secret commits |
+| Release | verification smoke; never silent prod ship |
+
+Full map: factory `docs/workflows/SUPERPOWERS.md`. Thin skill: `.cursor/skills/aion-superpowers-bridge/SKILL.md`.
