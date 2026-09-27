@@ -7,7 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { QUALIFICATION_OPTIONS } from "@/lib/intelligence/call-workspace";
-import type { CallOutcome, ObjectionRecord, QualificationState } from "@/lib/sales/types";
+import { QUALIFICATION_DIMENSIONS } from "@/lib/sales/motion";
+import type {
+  CallOutcome,
+  ObjectionRecord,
+  QualificationProfile,
+  QualificationState,
+} from "@/lib/sales/types";
 import { cn } from "@/lib/utils";
 
 type PostCallOutcomeFormProps = {
@@ -40,6 +46,9 @@ export function PostCallOutcomeForm({
   const [qualification, setQualification] = useState<QualificationState>(
     initialOutcome?.qualification ?? "exploring",
   );
+  const [qualificationProfile, setQualificationProfile] = useState<QualificationProfile>(
+    initialOutcome?.qualificationProfile ?? {},
+  );
   const [painPoints, setPainPoints] = useState<string[]>(() => {
     if (initialOutcome?.painPoints.length) {
       return initialOutcome.painPoints;
@@ -71,6 +80,10 @@ export function PostCallOutcomeForm({
   const [isPending, startTransition] = useTransition();
 
   const readOnly = Boolean(savedOutcome) || !canPersist;
+
+  function updateQualificationField(key: keyof QualificationProfile, value: string) {
+    setQualificationProfile((current) => ({ ...current, [key]: value }));
+  }
 
   function updatePainPoint(index: number, value: string) {
     setPainPoints((current) => current.map((item, i) => (i === index ? value : item)));
@@ -112,6 +125,7 @@ export function PostCallOutcomeForm({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             qualification,
+            qualificationProfile,
             painPoints: painPoints.map((item) => item.trim()).filter(Boolean),
             objections: objections
               .map((item) => ({
@@ -171,6 +185,15 @@ export function PostCallOutcomeForm({
             </p>
             <ul className="list-disc space-y-1 pl-4">
               <li>Qualification: {savedOutcome.qualification}</li>
+              {savedOutcome.qualificationProfile
+                ? QUALIFICATION_DIMENSIONS.filter(
+                    (dimension) => savedOutcome.qualificationProfile?.[dimension.profileKey],
+                  ).map((dimension) => (
+                    <li key={dimension.id}>
+                      {dimension.label}: {savedOutcome.qualificationProfile?.[dimension.profileKey]}
+                    </li>
+                  ))
+                : null}
               <li>Next action: {savedOutcome.nextAction}</li>
               {savedOutcome.painPoints.length > 0 ? (
                 <li>Pain points: {savedOutcome.painPoints.join(", ")}</li>
@@ -234,7 +257,29 @@ export function PostCallOutcomeForm({
 
       <Card>
         <CardHeader>
-          <CardTitle>Pain points</CardTitle>
+          <CardTitle>Qualification detail</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {QUALIFICATION_DIMENSIONS.map((dimension) => (
+            <label className="block space-y-1.5" key={dimension.id}>
+              <span className="text-xs text-muted-foreground">{dimension.label}</span>
+              <Input
+                type="text"
+                value={qualificationProfile[dimension.profileKey] ?? ""}
+                onChange={(event) =>
+                  updateQualificationField(dimension.profileKey, event.target.value)
+                }
+                placeholder={dimension.checklist}
+                disabled={readOnly || isPending}
+              />
+            </label>
+          ))}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Workflow problems</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="space-y-2">
@@ -244,7 +289,7 @@ export function PostCallOutcomeForm({
                   type="text"
                   value={pain}
                   onChange={(event) => updatePainPoint(index, event.target.value)}
-                  placeholder="e.g. slow lead response"
+                  placeholder="e.g. manual status updates between systems"
                   disabled={readOnly || isPending}
                 />
                 {!readOnly && painPoints.length > 1 ? (
@@ -269,7 +314,7 @@ export function PostCallOutcomeForm({
               onClick={addPainPoint}
               disabled={isPending}
             >
-              Add pain point
+              Add workflow problem
             </Button>
           ) : null}
         </CardContent>

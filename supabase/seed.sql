@@ -1,10 +1,11 @@
--- Optional seed for local/preview testing after migration.
+-- Optional seed for local/preview testing after migrations.
 -- Replace USER_ID with the auth.users id of your test rep.
+-- Requires 20260927120000_aion_sales_motion.sql (funnel + workflow context).
 
 -- Example (uncomment and edit after creating a Supabase Auth user):
 --
 -- insert into public.organizations (id, name)
--- values ('11111111-1111-4111-8111-111111111111', 'Demo Contractor Co');
+-- values ('11111111-1111-4111-8111-111111111111', 'AION');
 --
 -- insert into public.organization_members (organization_id, user_id, role)
 -- values (
@@ -17,16 +18,16 @@
 --   id,
 --   organization_id,
 --   industry,
---   services,
---   likely_pains,
---   relevant_offer
+--   existing_systems,
+--   workflow_problems,
+--   recommended_service
 -- ) values (
 --   '22222222-2222-4222-8222-222222222222',
 --   '11111111-1111-4111-8111-111111111111',
---   'home-services',
---   '["HVAC repair", "maintenance"]'::jsonb,
---   '["slow lead response", "inconsistent follow-up"]'::jsonb,
---   'conversion copilot trial'
+--   'home services',
+--   '["phone and voicemail", "spreadsheets", "QuickBooks"]'::jsonb,
+--   '["manual lead follow-up", "no shared job status"]'::jsonb,
+--   'workflow automation implementation'
 -- );
 --
 -- insert into public.leads (
@@ -44,5 +45,5 @@
 --   'Acme HVAC',
 --   'Jordan Lee',
 --   'outbound',
---   'new'
+--   'lead'
 -- );

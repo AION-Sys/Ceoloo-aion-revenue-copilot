@@ -17,3 +17,6 @@ export type SchemaTable = (typeof SCHEMA_TABLES)[number];
 export const RLS_PROTECTED_TABLES = SCHEMA_TABLES;
 
 export const MIGRATION_PATH = "supabase/migrations/20260829210000_initial_schema.sql";
+
+export const SALES_MOTION_MIGRATION_PATH =
+  "supabase/migrations/20260927120000_aion_sales_motion.sql";

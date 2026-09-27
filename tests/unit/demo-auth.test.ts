@@ -29,9 +29,9 @@ describe("demo auth", () => {
     expect(credentialsMatchDemo(email, "wrong")).toBe(false);
   });
 
-  it("returns a rep session for Demo Contractor Co", () => {
+  it("returns a rep session for AION", () => {
     const session = getDemoRepSession();
-    expect(session.organizationName).toBe("Demo Contractor Co");
+    expect(session.organizationName).toBe("AION");
     expect(session.role).toBe("rep");
     expect(session.email).toBe("rep@demo.local");
   });

@@ -43,6 +43,23 @@ describe("post-call outcome validation", () => {
     ).toBeNull();
   });
 
+  it("keeps AION qualification dimensions and drops funding fields", () => {
+    const input = parsePostCallOutcomeInput({
+      qualification: "exploring",
+      nextAction: "schedule business audit",
+      qualificationProfile: {
+        currentWorkflow: " Jobs are tracked in a spreadsheet ",
+        capitalNeed: "$50k",
+        annualRevenue: "2m",
+        fundingUrgency: "this week",
+      },
+    });
+
+    expect(input?.qualificationProfile).toEqual({
+      currentWorkflow: "Jobs are tracked in a spreadsheet",
+    });
+  });
+
   it("rejects non-object bodies", () => {
     expect(parsePostCallOutcomeInput(null)).toBeNull();
     expect(parsePostCallOutcomeInput("invalid")).toBeNull();

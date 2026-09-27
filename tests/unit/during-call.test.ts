@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildDuringCallGuidance } from "@/lib/intelligence/during-call";
+import { buildAgentSystemPrompt } from "@/lib/sales/motion";
 import type { BusinessContext, Lead } from "@/lib/sales/types";
 
 const lead: Lead = {
@@ -11,10 +12,10 @@ const lead: Lead = {
 const context: BusinessContext = {
   id: "ctx-1",
   organizationId: "org-1",
-  industry: "home-services",
-  services: ["HVAC repair"],
-  likelyPains: ["slow lead response"],
-  relevantOffer: "conversion copilot trial",
+  industry: "home services",
+  existingSystems: ["spreadsheets"],
+  workflowProblems: ["slow lead response"],
+  recommendedService: "workflow automation implementation",
 };
 
 describe("buildDuringCallGuidance", () => {
@@ -22,8 +23,14 @@ describe("buildDuringCallGuidance", () => {
     const guidance = buildDuringCallGuidance({ lead, context });
 
     expect(guidance.checklist.length).toBeGreaterThan(2);
+    expect(guidance.checklist.some((item) => item.toLowerCase().includes("decision maker"))).toBe(
+      true,
+    );
+    expect(guidance.checklist.some((item) => item.toLowerCase().includes("automation"))).toBe(true);
     expect(guidance.nextBestQuestion).toContain("slow lead response");
-    expect(guidance.nextBestAction).toContain("conversion copilot trial");
+    expect(guidance.nextBestAction).toContain("workflow automation implementation");
+    expect(guidance.qualificationPrompt.toLowerCase()).not.toContain("capital");
+    expect(buildAgentSystemPrompt().toLowerCase()).not.toContain("annual revenue");
   });
 
   it("uses rep notes in the script cue when provided", () => {

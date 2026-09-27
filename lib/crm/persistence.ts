@@ -6,6 +6,7 @@ export function outcomeToCrmEvent(outcome: CallOutcome): CrmEvent {
     leadId: outcome.leadId,
     payload: {
       qualification: outcome.qualification,
+      qualificationProfile: outcome.qualificationProfile ?? {},
       nextAction: outcome.nextAction,
       outcomeId: outcome.id,
     },

@@ -9,6 +9,16 @@ APPROVED — MVP scaffold
 ## Summary
 Next.js sales workspace with Supabase for persistence, AION AI Gateway for conversational intelligence, and AION event infrastructure for CRM + learning signals. V1 is a tight rep workflow — not a platform.
 
+## Sales motion
+
+The copilot reasons with AION's implementation funnel:
+
+Lead → Business Audit → Problem/Workflow Diagnosis → Qualified Opportunity → Solution/Implementation Scope → Proposal → Closed Won → Onboarding.
+
+Qualification dimensions live in `lib/sales/motion.ts` and are the agent instructions, the pre-call questions, the during-call checklist, and the `qualification_profile` stored on call outcomes: current workflow/problem, business impact, existing systems/tools, automation opportunity, decision maker, implementation readiness, urgency/timeline, budget/commercial fit, and recommended AION service.
+
+Business context (`existing_systems`, `workflow_problems`, `recommended_service`) describes the prospect workflow an AION engagement would change.
+
 ## System Context
 
 ```
@@ -41,6 +51,7 @@ Next.js sales workspace with Supabase for persistence, AION AI Gateway for conve
 | Events | HTTP ingest to AION events infra | Decouple product from learning pipeline |
 | Deployment | Vercel | Standard for Next.js; CEO gate on prod |
 | V1 scope | Assisted workspace, no autonomous calling | Validate workflow before automation |
+| Sales motion | AION implementation funnel | Qualify workflow and implementation fit |
 
 ## Components
 
@@ -48,7 +59,7 @@ Next.js sales workspace with Supabase for persistence, AION AI Gateway for conve
 |-----------|------|----------------|
 | App shell | `app/` | Routes, layout, rep UI |
 | UI components | `components/` | Workflow phases, call panels |
-| Sales domain | `lib/sales/` | Types: Lead, CallOutcome, qualification |
+| Sales domain | `lib/sales/` | Funnel, qualification dimensions, agent instructions, lead and outcome types |
 | Intelligence | `lib/intelligence/` | Pre-call brief, objection detection (AI) |
 | AI client | `lib/ai/` | AION AI Gateway HTTP client |
 | CRM | `lib/crm/` | Persist lead/call state, emit CRM events |

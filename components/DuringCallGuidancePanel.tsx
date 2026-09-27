@@ -247,7 +247,7 @@ export function DuringCallGuidancePanel({
               rows={2}
               value={qualificationNotes}
               onChange={(event) => setQualificationNotes(event.target.value)}
-              placeholder="Budget, timeline, authority, need…"
+              placeholder="Workflow, impact, systems, decision maker, timeline, commercial fit…"
             />
           </label>
           <p className="text-xs text-muted-foreground" aria-live="polite">

@@ -4,20 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getRepSession } from "@/lib/auth/session";
 import { listLeadsForOrganization } from "@/lib/leads/repository";
-
-const PIPELINE_STAGES = [
-  "New",
-  "Contacted",
-  "Qualified",
-  "Discovery",
-  "Documents Requested",
-  "Documents Received",
-  "Submitted",
-  "Offer",
-  "Closing",
-  "Funded",
-  "Lost",
-] as const;
+import { FUNNEL_STAGES, formatFunnelPath, funnelStageLabel } from "@/lib/sales/motion";
 
 export default async function PipelinePage() {
   const repSession = await getRepSession();
@@ -30,7 +17,7 @@ export default async function PipelinePage() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Pipeline</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Move opportunities from first contact through funded outcomes.
+          {formatFunnelPath()}.
         </p>
       </div>
 
@@ -41,17 +28,15 @@ export default async function PipelinePage() {
         </TabsList>
         <TabsContent value="board" className="mt-4">
           <div className="flex gap-3 overflow-x-auto pb-2">
-            {PIPELINE_STAGES.map((stage) => {
-              const stageLeads = leads.filter((lead) =>
-                stageMatchesLead(stage, lead.status ?? "new"),
-              );
+            {FUNNEL_STAGES.map((stage) => {
+              const stageLeads = leads.filter((lead) => (lead.status ?? "lead") === stage);
               return (
                 <div
                   key={stage}
                   className="w-56 shrink-0 rounded-xl border bg-card"
                 >
                   <div className="border-b px-3 py-2">
-                    <p className="text-xs font-semibold">{stage}</p>
+                    <p className="text-xs font-semibold">{funnelStageLabel(stage)}</p>
                     <p className="text-[11px] text-muted-foreground">
                       {stageLeads.length}
                     </p>
@@ -110,7 +95,7 @@ export default async function PipelinePage() {
                         {lead.contactName ?? "—"}
                       </td>
                       <td className="px-3 py-2.5">{lead.companyName}</td>
-                      <td className="px-3 py-2.5 capitalize">{lead.status}</td>
+                      <td className="px-3 py-2.5">{funnelStageLabel(lead.status)}</td>
                       <td className="px-3 py-2.5 text-muted-foreground">You</td>
                       <td className="px-3 py-2.5">
                         <Button asChild size="sm" variant="outline">
@@ -127,15 +112,4 @@ export default async function PipelinePage() {
       </Tabs>
     </div>
   );
-}
-
-function stageMatchesLead(
-  stage: (typeof PIPELINE_STAGES)[number],
-  status: string,
-): boolean {
-  if (stage === "New") return status === "new";
-  if (stage === "Contacted") return status === "contacted";
-  if (stage === "Qualified") return status === "qualified";
-  if (stage === "Lost") return status === "closed";
-  return false;
 }

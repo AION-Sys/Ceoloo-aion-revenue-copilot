@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getRepSession } from "@/lib/auth/session";
 import { listLeadsForOrganization } from "@/lib/leads/repository";
+import { funnelStageLabel } from "@/lib/sales/motion";
 
 export default async function CallsPage() {
   const repSession = await getRepSession();
@@ -72,7 +73,7 @@ export default async function CallsPage() {
                     <tr key={lead.id} className="hover:bg-muted/30">
                       <td className="px-3 py-2.5">{lead.contactName ?? "—"}</td>
                       <td className="px-3 py-2.5">{lead.companyName}</td>
-                      <td className="px-3 py-2.5 capitalize">{lead.status}</td>
+                      <td className="px-3 py-2.5">{funnelStageLabel(lead.status)}</td>
                       <td className="px-3 py-2.5 text-muted-foreground">
                         Ready for pre-call
                       </td>

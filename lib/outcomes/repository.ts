@@ -66,6 +66,7 @@ export async function saveCallOutcome(
     objections: input.objections,
     next_action: input.nextAction,
     transcript_summary: input.transcriptSummary ?? null,
+    qualification_profile: input.qualificationProfile ?? {},
   };
 
   const { data: created, error: createError } = await outcomes

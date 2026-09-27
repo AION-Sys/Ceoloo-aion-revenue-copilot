@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Applies the initial schema migration via direct Postgres connection.
+ * Applies schema migrations in filename order via direct Postgres connection.
  * Requires DATABASE_URL (Supabase → Settings → Database → Connection string URI).
  *
  * Usage:
@@ -11,10 +11,7 @@ import fs from "node:fs";
 import path from "node:path";
 import pg from "pg";
 
-const migrationPath = path.join(
-  process.cwd(),
-  "supabase/migrations/20260829210000_initial_schema.sql",
-);
+const migrationsDir = path.join(process.cwd(), "supabase/migrations");
 
 async function main() {
   const databaseUrl = process.env.DATABASE_URL?.trim();
@@ -23,12 +20,19 @@ async function main() {
     process.exit(1);
   }
 
-  const sql = fs.readFileSync(migrationPath, "utf8");
+  const files = fs
+    .readdirSync(migrationsDir)
+    .filter((file) => file.endsWith(".sql"))
+    .sort();
   const client = new pg.Client({ connectionString: databaseUrl, ssl: { rejectUnauthorized: false } });
 
   await client.connect();
   try {
-    await client.query(sql);
+    for (const file of files) {
+      const sql = fs.readFileSync(path.join(migrationsDir, file), "utf8");
+      await client.query(sql);
+      console.log(`Applied ${file}`);
+    }
     const result = await client.query(
       "select to_regclass('public.organizations') as organizations_table",
     );

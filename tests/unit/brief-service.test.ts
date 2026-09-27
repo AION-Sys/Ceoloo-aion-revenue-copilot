@@ -13,10 +13,10 @@ const lead: Lead = {
 const context: BusinessContext = {
   id: "ctx-1",
   organizationId: "org-1",
-  industry: "home-services",
-  services: ["HVAC repair"],
-  likelyPains: ["slow lead response"],
-  relevantOffer: "conversion copilot trial",
+  industry: "home services",
+  existingSystems: ["spreadsheets"],
+  workflowProblems: ["slow lead response"],
+  recommendedService: "workflow automation implementation",
 };
 
 describe("pre-call brief service", () => {

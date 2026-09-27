@@ -13,13 +13,11 @@ import type { BusinessContext, Lead } from "@/lib/sales/types";
 import { cn } from "@/lib/utils";
 
 const STAGES = [
-  "Opening",
+  "Business Audit",
+  "Workflow Diagnosis",
   "Qualification",
-  "Discovery",
-  "Objection",
-  "Solution",
-  "Commitment",
-  "Close",
+  "Solution Scope",
+  "Next Step",
 ] as const;
 
 type LiveCallWorkspaceProps = {
@@ -42,7 +40,7 @@ export function LiveCallWorkspace({
   guidance,
 }: LiveCallWorkspaceProps) {
   const [seconds, setSeconds] = useState(0);
-  const [stageIndex] = useState(2);
+  const [stageIndex] = useState(1);
   const transcript = useMemo<TranscriptLine[]>(
     () => [
       {
@@ -55,12 +53,12 @@ export function LiveCallWorkspace({
       {
         id: "2",
         speaker: "Prospect",
-        text: context.likelyPains[0]
-          ? `We're dealing with ${context.likelyPains[0]} and need a clearer path forward.`
-          : "We're evaluating options and want to understand fit before committing.",
+        text: context.workflowProblems[0]
+          ? `We're dealing with ${context.workflowProblems[0]} and need a clearer implementation path.`
+          : "We're evaluating the workflow and want to understand implementation fit.",
       },
     ],
-    [context.likelyPains, guidance.scriptCue],
+    [context.workflowProblems, guidance.scriptCue],
   );
 
   useEffect(() => {
@@ -88,9 +86,9 @@ export function LiveCallWorkspace({
               <p className="text-xs font-semibold">Company Snapshot</p>
               <dl className="mt-2 space-y-1.5 text-xs">
                 <Row label="Industry" value={context.industry} />
-                <Row label="Services" value={context.services.join(", ") || "—"} />
+                <Row label="Systems" value={context.existingSystems.join(", ") || "—"} />
                 <Row label="Source" value={lead.source ?? "—"} />
-                <Row label="Offer" value={context.relevantOffer ?? "—"} />
+                <Row label="AION service" value={context.recommendedService ?? "—"} />
               </dl>
             </div>
             <Separator />
@@ -143,7 +141,7 @@ export function LiveCallWorkspace({
         </ScrollArea>
         <div className="flex items-center justify-between gap-2 border-t px-3 py-2">
           <p className="text-xs text-muted-foreground">
-            Highlighted entities appear as funding, urgency, and timeline are spoken.
+            Highlighted entities appear as workflow, systems, impact, and timeline are spoken.
           </p>
           <Button asChild size="sm" variant="outline">
             <Link href={`/calls/${callId}/review`}>End & review</Link>
@@ -176,14 +174,14 @@ export function LiveCallWorkspace({
             </div>
 
             <div>
-              <p className="text-xs font-semibold">Buying Signals</p>
+              <p className="text-xs font-semibold">Workflow signals</p>
               <ul className="mt-2 space-y-1.5">
-                {context.likelyPains.slice(0, 4).map((pain) => (
-                  <li key={pain}>
-                    <Badge variant="success">{pain}</Badge>
+                {context.workflowProblems.slice(0, 4).map((problem) => (
+                  <li key={problem}>
+                    <Badge variant="success">{problem}</Badge>
                   </li>
                 ))}
-                {context.likelyPains.length === 0 ? (
+                {context.workflowProblems.length === 0 ? (
                   <li className="text-xs text-muted-foreground">Listening for signals…</li>
                 ) : null}
               </ul>
@@ -226,9 +224,9 @@ export function LiveCallWorkspace({
               </div>
               <Progress value={readiness} />
               <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
-                <li>Context loaded from business profile</li>
-                <li>Discovery checklist in progress</li>
-                <li>Decision path still being confirmed</li>
+                <li>Context loaded from the business audit</li>
+                <li>Qualification checklist in progress</li>
+                <li>Implementation path still being confirmed</li>
               </ul>
             </div>
           </div>

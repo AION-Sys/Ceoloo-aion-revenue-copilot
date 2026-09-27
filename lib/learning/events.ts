@@ -6,6 +6,7 @@ export function outcomeToLearningEvent(outcome: CallOutcome): LearningEvent {
     payload: {
       leadId: outcome.leadId,
       qualification: outcome.qualification,
+      qualificationProfile: outcome.qualificationProfile ?? {},
       objectionCount: outcome.objections.length,
       painPointCount: outcome.painPoints.length,
       nextAction: outcome.nextAction,

@@ -8,7 +8,7 @@ const baseLead: Lead = {
   companyName: "Acme HVAC",
   contactName: "Jordan Lee",
   source: "outbound",
-  status: "new",
+  status: "lead",
 };
 
 describe("buildOverviewDashboard", () => {
@@ -30,8 +30,8 @@ describe("buildOverviewDashboard", () => {
 
   it("counts qualified leads in KPIs", () => {
     const overview = buildOverviewDashboard([
-      { ...baseLead, status: "qualified" },
-      { ...baseLead, id: "lead-2", status: "contacted", companyName: "Beta" },
+      { ...baseLead, status: "qualified_opportunity" },
+      { ...baseLead, id: "lead-2", status: "business_audit", companyName: "Beta" },
     ]);
     expect(overview.kpis.find((kpi) => kpi.id === "qualified")?.value).toBe("1");
     expect(overview.kpis.find((kpi) => kpi.id === "conversations")?.value).toBe("2");

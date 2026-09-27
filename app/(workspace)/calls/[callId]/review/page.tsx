@@ -76,7 +76,7 @@ export default async function CallReviewPage({ params }: ReviewPageProps) {
           Post-call review · {callWithLead.lead.companyName}
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Capture structured outcome — qualification, pains, objections, and next action —
+          Capture structured outcome — qualification, workflow problems, objections, and next action —
           before CRM and learning ingest (Tasks 7–8).
         </p>
       </div>
@@ -90,11 +90,11 @@ export default async function CallReviewPage({ params }: ReviewPageProps) {
             Discovery call with {callWithLead.lead.contactName ?? "the contact"} at{" "}
             {callWithLead.lead.companyName}. Guidance recommended: {guidance.nextBestAction}
           </p>
-          {context.likelyPains.length > 0 ? (
+          {context.workflowProblems.length > 0 ? (
             <div className="flex flex-wrap gap-2">
-              {context.likelyPains.map((pain) => (
-                <Badge key={pain} variant="success">
-                  {pain}
+              {context.workflowProblems.map((problem) => (
+                <Badge key={problem} variant="success">
+                  {problem}
                 </Badge>
               ))}
             </div>
@@ -117,7 +117,7 @@ export default async function CallReviewPage({ params }: ReviewPageProps) {
         companyName={callWithLead.lead.companyName}
         leadId={callWithLead.lead.id}
         initialOutcome={initialOutcome}
-        suggestedPainPoints={initialOutcome ? undefined : context.likelyPains}
+        suggestedPainPoints={initialOutcome ? undefined : context.workflowProblems}
         suggestedObjection={
           initialOutcome ? undefined : guidance.objectionReframe ?? undefined
         }

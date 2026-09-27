@@ -1,9 +1,19 @@
 /**
  * Core domain types for the conversion copilot.
- * Architect-owned contracts — extend as MVP tasks land.
+ * Sales motion: AION implementation funnel — see lib/sales/motion.ts.
  */
 
-export type LeadStatus = "new" | "contacted" | "qualified" | "closed";
+export type FunnelStage =
+  | "lead"
+  | "business_audit"
+  | "problem_diagnosis"
+  | "qualified_opportunity"
+  | "solution_scope"
+  | "proposal"
+  | "closed_won"
+  | "onboarding";
+
+export type LeadStatus = FunnelStage;
 
 export type Lead = {
   id: string;
@@ -15,16 +25,39 @@ export type Lead = {
   businessContextId?: string;
 };
 
+/**
+ * What the copilot knows about a prospect account.
+ * Describes the workflow AION might implement — not a funding application.
+ */
 export type BusinessContext = {
   id: string;
   organizationId: string;
   industry: string;
-  services: string[];
-  likelyPains: string[];
-  relevantOffer?: string;
+  /** Systems and tools already in the prospect's workflow. */
+  existingSystems: string[];
+  /** Current workflow problems to diagnose. */
+  workflowProblems: string[];
+  /** Recommended AION service when one has been identified. */
+  recommendedService?: string;
 };
 
 export type QualificationState = "unqualified" | "exploring" | "qualified" | "disqualified";
+
+/**
+ * Qualification snapshot for an AION implementation opportunity.
+ * Keys match the sales-motion dimensions. Funding fields are not part of this schema.
+ */
+export type QualificationProfile = {
+  currentWorkflow?: string;
+  businessImpact?: string;
+  existingSystems?: string;
+  automationOpportunity?: string;
+  decisionMaker?: string;
+  implementationReadiness?: string;
+  urgencyTimeline?: string;
+  budgetFit?: string;
+  recommendedService?: string;
+};
 
 export type CallOutcome = {
   id: string;
@@ -32,6 +65,7 @@ export type CallOutcome = {
   painPoints: string[];
   objections: ObjectionRecord[];
   qualification: QualificationState;
+  qualificationProfile?: QualificationProfile;
   nextAction: string;
   transcriptSummary?: string;
   occurredAt: string;
