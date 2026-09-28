@@ -1,5 +1,6 @@
-import type { BusinessContextRow, LeadRow } from "@/lib/supabase/database.types";
+import { normalizeLeadStatus } from "@/lib/sales/motion";
 import type { BusinessContext, Lead } from "@/lib/sales/types";
+import type { BusinessContextRow, LeadRow } from "@/lib/supabase/database.types";
 
 export function mapLeadRow(row: LeadRow): Lead {
   return {
@@ -8,7 +9,7 @@ export function mapLeadRow(row: LeadRow): Lead {
     companyName: row.company_name,
     contactName: row.contact_name ?? undefined,
     source: row.source ?? undefined,
-    status: row.status,
+    status: normalizeLeadStatus(row.status),
     businessContextId: row.business_context_id ?? undefined,
   };
 }
@@ -18,9 +19,9 @@ export function mapBusinessContextRow(row: BusinessContextRow): BusinessContext 
     id: row.id,
     organizationId: row.organization_id,
     industry: row.industry,
-    services: row.services,
-    likelyPains: row.likely_pains,
-    relevantOffer: row.relevant_offer ?? undefined,
+    existingSystems: row.existing_systems,
+    workflowProblems: row.workflow_problems,
+    recommendedService: row.recommended_service ?? undefined,
   };
 }
 
@@ -28,8 +29,8 @@ export function createDefaultBusinessContext(organizationId: string): BusinessCo
   return {
     id: "default",
     organizationId,
-    industry: "general",
-    services: [],
-    likelyPains: [],
+    industry: "unknown",
+    existingSystems: [],
+    workflowProblems: [],
   };
 }

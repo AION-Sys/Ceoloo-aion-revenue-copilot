@@ -15,22 +15,22 @@ export const QUALIFICATION_OPTIONS: ReadonlyArray<{
   {
     value: "unqualified",
     label: "Unqualified",
-    description: "Not yet enough signal",
+    description: "Workflow and implementation fit are not yet understood",
   },
   {
     value: "exploring",
     label: "Exploring",
-    description: "Active discovery / interest",
+    description: "Business audit or workflow diagnosis is in progress",
   },
   {
     value: "qualified",
     label: "Qualified",
-    description: "Fit + intent confirmed",
+    description: "Problem, impact, and implementation fit are confirmed",
   },
   {
     value: "disqualified",
     label: "Disqualified",
-    description: "Not a fit right now",
+    description: "Not a fit for an AION engagement right now",
   },
 ];
 

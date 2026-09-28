@@ -8,20 +8,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getRepSession } from "@/lib/auth/session";
 import { getPreCallBriefForLead } from "@/lib/intelligence/brief";
+import {
+  QUALIFICATION_DIMENSIONS,
+  funnelStageLabel,
+  isQualifiedFunnelStage,
+  nextActionForStage,
+} from "@/lib/sales/motion";
 
 type DealPageProps = {
   params: Promise<{ dealId: string }>;
 };
-
-const REQUIREMENTS = [
-  "Application",
-  "4 months bank statements",
-  "MTD",
-  "ID",
-  "Voided check",
-  "Tax returns",
-  "Additional underwriting documents",
-] as const;
 
 export default async function DealDetailPage({ params }: DealPageProps) {
   const repSession = await getRepSession();
@@ -36,8 +32,8 @@ export default async function DealDetailPage({ params }: DealPageProps) {
   }
 
   const { lead, context, recommendedQuestions } = result.brief;
-  const likelyPains = context.likelyPains;
-  const relevantOffer = context.relevantOffer ?? "";
+  const workflowProblems = context.workflowProblems;
+  const recommendedService = context.recommendedService ?? "";
 
   return (
     <div className="mx-auto grid max-w-7xl gap-6 xl:grid-cols-[minmax(0,1fr)_280px]">
@@ -72,13 +68,16 @@ export default async function DealDetailPage({ params }: DealPageProps) {
           <TabsContent value="overview" className="mt-4 space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Funding / Opportunity</CardTitle>
+                <CardTitle>Opportunity</CardTitle>
               </CardHeader>
               <CardContent className="grid gap-2 text-sm sm:grid-cols-2">
-                <Field label="Amount requested" value="—" />
-                <Field label="Product" value={relevantOffer || "—"} />
-                <Field label="Purpose" value={likelyPains[0] ?? "—"} />
-                <Field label="Stage" value={lead.status ?? "new"} />
+                <Field label="Funnel stage" value={funnelStageLabel(lead.status)} />
+                <Field label="Recommended AION service" value={recommendedService || "—"} />
+                <Field label="Current workflow" value={workflowProblems[0] ?? "—"} />
+                <Field
+                  label="Existing systems"
+                  value={context.existingSystems.join(", ") || "—"}
+                />
               </CardContent>
             </Card>
             <Card>
@@ -87,22 +86,27 @@ export default async function DealDetailPage({ params }: DealPageProps) {
               </CardHeader>
               <CardContent className="grid gap-2 text-sm sm:grid-cols-2">
                 <Field label="Industry" value={context.industry} />
-                <Field label="Services" value={context.services.join(", ") || "—"} />
+                <Field
+                  label="Systems"
+                  value={context.existingSystems.join(", ") || "—"}
+                />
                 <Field label="Source" value={lead.source ?? "—"} />
-                <Field label="Ownership" value="—" />
+                <Field label="Decision maker" value="—" />
               </CardContent>
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle>Requirements</CardTitle>
+                <CardTitle>Qualification focus</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                {REQUIREMENTS.map((item) => (
-                  <label key={item} className="flex items-center gap-2 text-sm">
-                    <input type="checkbox" className="rounded border" disabled />
-                    {item}
-                  </label>
-                ))}
+                <p className="text-sm text-muted-foreground">
+                  Capture these during the business audit and workflow diagnosis.
+                </p>
+                <ul className="list-disc space-y-1 pl-4 text-sm">
+                  {QUALIFICATION_DIMENSIONS.map((dimension) => (
+                    <li key={dimension.id}>{dimension.label}</li>
+                  ))}
+                </ul>
               </CardContent>
             </Card>
           </TabsContent>
@@ -123,7 +127,7 @@ export default async function DealDetailPage({ params }: DealPageProps) {
           <TabsContent value="documents">
             <EmptyState
               title="No documents uploaded"
-              description="Bank statements and underwriting files will be tracked here."
+              description="Implementation notes and scope files will be tracked here."
             />
           </TabsContent>
           <TabsContent value="notes">
@@ -155,7 +159,7 @@ export default async function DealDetailPage({ params }: DealPageProps) {
             <CardTitle>Readiness</CardTitle>
           </CardHeader>
           <CardContent>
-            <ReadinessScore score={lead.status === "qualified" ? 72 : 38} />
+            <ReadinessScore score={isQualifiedFunnelStage(lead.status) ? 72 : 38} />
           </CardContent>
         </Card>
         <Card>
@@ -163,9 +167,7 @@ export default async function DealDetailPage({ params }: DealPageProps) {
             <CardTitle>Next Best Action</CardTitle>
           </CardHeader>
           <CardContent className="text-sm">
-            {lead.status === "new"
-              ? "Open the pre-call brief and start discovery."
-              : "Advance qualification and schedule the next follow-up."}
+            {nextActionForStage(lead.status)}
           </CardContent>
         </Card>
         <Card>
@@ -173,7 +175,7 @@ export default async function DealDetailPage({ params }: DealPageProps) {
             <CardTitle>Risk Flags</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-2">
-            <Badge variant="warning">Missing documents</Badge>
+            <Badge variant="warning">Qualification open</Badge>
             <Badge variant="secondary">No completed call</Badge>
           </CardContent>
         </Card>
@@ -182,10 +184,10 @@ export default async function DealDetailPage({ params }: DealPageProps) {
             <CardTitle>AI Insights</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-sm text-muted-foreground">
-            {likelyPains.length === 0 ? (
-              <p>No pains inferred yet.</p>
+            {workflowProblems.length === 0 ? (
+              <p>No workflow problems captured yet.</p>
             ) : (
-              likelyPains.map((pain) => <p key={pain}>• {pain}</p>)
+              workflowProblems.map((problem) => <p key={problem}>• {problem}</p>)
             )}
           </CardContent>
         </Card>
@@ -198,7 +200,7 @@ function Field({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="mt-0.5 capitalize">{value}</p>
+      <p className="mt-0.5">{value}</p>
     </div>
   );
 }

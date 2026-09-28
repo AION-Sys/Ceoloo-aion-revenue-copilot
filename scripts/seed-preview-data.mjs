@@ -58,7 +58,7 @@ async function main() {
 
   const { error: orgError } = await supabase.from("organizations").upsert({
     id: ORG_ID,
-    name: "Demo Contractor Co",
+    name: "AION",
   });
   if (orgError) throw orgError;
 
@@ -75,10 +75,10 @@ async function main() {
   const { error: contextError } = await supabase.from("business_contexts").upsert({
     id: CONTEXT_ID,
     organization_id: ORG_ID,
-    industry: "home-services",
-    services: ["HVAC repair", "maintenance"],
-    likely_pains: ["slow lead response", "inconsistent follow-up"],
-    relevant_offer: "conversion copilot trial",
+    industry: "home services",
+    existing_systems: ["phone and voicemail", "spreadsheets", "QuickBooks"],
+    workflow_problems: ["manual lead follow-up", "no shared job status"],
+    recommended_service: "workflow automation implementation",
   });
   if (contextError) throw contextError;
 
@@ -89,7 +89,7 @@ async function main() {
     company_name: "Acme HVAC",
     contact_name: "Jordan Lee",
     source: "outbound",
-    status: "new",
+    status: "lead",
   });
   if (leadError) throw leadError;
 

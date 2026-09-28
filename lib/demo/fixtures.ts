@@ -14,17 +14,17 @@ export const DEMO_LEAD: Lead = {
   companyName: "Acme HVAC",
   contactName: "Jordan Lee",
   source: "outbound",
-  status: "new",
+  status: "lead",
   businessContextId: DEMO_CONTEXT_ID,
 };
 
 export const DEMO_BUSINESS_CONTEXT: BusinessContext = {
   id: DEMO_CONTEXT_ID,
   organizationId: DEMO_ORG_ID,
-  industry: "home-services",
-  services: ["HVAC repair", "maintenance"],
-  likelyPains: ["slow lead response", "inconsistent follow-up"],
-  relevantOffer: "conversion copilot trial",
+  industry: "home services",
+  existingSystems: ["phone and voicemail", "spreadsheets", "QuickBooks"],
+  workflowProblems: ["manual lead follow-up", "no shared job status"],
+  recommendedService: "workflow automation implementation",
 };
 
 export function getDemoCall(): Call {
@@ -55,8 +55,8 @@ export function getDemoBusinessContextForLead(lead: Lead): BusinessContext {
       id: "00000000-0000-4000-8000-000000000000",
       organizationId: lead.organizationId,
       industry: "unknown",
-      services: [],
-      likelyPains: [],
+      existingSystems: [],
+      workflowProblems: [],
     };
   }
   return DEMO_BUSINESS_CONTEXT;

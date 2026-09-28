@@ -44,7 +44,7 @@ export function getDemoRepSession(): RepSession {
     userId: DEMO_USER_ID,
     email,
     organizationId: DEMO_ORG_ID,
-    organizationName: "Demo Contractor Co",
+    organizationName: "AION",
     role: "rep",
   };
 }

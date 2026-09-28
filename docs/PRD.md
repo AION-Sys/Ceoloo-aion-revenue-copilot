@@ -33,8 +33,16 @@ Home-service contractors and SMB sales teams generate leads, but revenue leaks b
 
 ## Requirements
 
+### Sales motion
+Reps qualify prospects for AION implementation work:
+
+Lead → Business Audit → Problem/Workflow Diagnosis → Qualified Opportunity → Solution/Implementation Scope → Proposal → Closed Won → Onboarding.
+
+Qualification covers current workflow/problem, business impact, existing systems/tools, automation opportunity, decision maker, implementation readiness, urgency/timeline, budget/commercial fit, and recommended AION service.
+
 ### Must Have
 - Pre-call brief from lead + business context
+- Qualification and agent guidance follow the AION implementation funnel above
 - During-call guidance surfaces (checklist, objections, next-best action)
 - Post-call structured outcome capture
 - CRM persistence for lead/call state

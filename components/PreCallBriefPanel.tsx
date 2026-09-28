@@ -1,4 +1,5 @@
 import { startCallForLead } from "@/lib/leads/actions";
+import { funnelStageLabel } from "@/lib/sales/motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { PreCallBrief } from "@/lib/intelligence/pre-call";
@@ -33,7 +34,7 @@ export function PreCallBriefPanel({ brief }: PreCallBriefPanelProps) {
           </CardHeader>
           <CardContent>
             <ul className="space-y-1 text-sm text-muted-foreground">
-              <li>Status: {lead.status ?? "new"}</li>
+              <li>Stage: {funnelStageLabel(lead.status)}</li>
               {lead.source ? <li>Source: {lead.source}</li> : null}
               <li>Industry: {context.industry}</li>
             </ul>
@@ -42,29 +43,34 @@ export function PreCallBriefPanel({ brief }: PreCallBriefPanelProps) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Likely pains</CardTitle>
+            <CardTitle>Workflow problems</CardTitle>
           </CardHeader>
           <CardContent>
-            {context.likelyPains.length > 0 ? (
+            {context.workflowProblems.length > 0 ? (
               <ul className="list-disc space-y-1 pl-4 text-sm text-muted-foreground">
-                {context.likelyPains.map((pain) => (
-                  <li key={pain}>{pain}</li>
+                {context.workflowProblems.map((problem) => (
+                  <li key={problem}>{problem}</li>
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-muted-foreground">No pains recorded yet.</p>
+              <p className="text-sm text-muted-foreground">No workflow problems recorded yet.</p>
             )}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Relevant offer</CardTitle>
+            <CardTitle>Recommended AION service</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-2">
             <p className="text-sm text-muted-foreground">
-              {context.relevantOffer ?? "No offer configured for this context."}
+              {context.recommendedService ?? "No AION service recommended yet."}
             </p>
+            {context.existingSystems.length > 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Systems: {context.existingSystems.join(", ")}
+              </p>
+            ) : null}
           </CardContent>
         </Card>
       </div>

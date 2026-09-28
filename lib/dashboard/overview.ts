@@ -1,3 +1,10 @@
+import {
+  funnelStageLabel,
+  isConversationStage,
+  isOpenFunnelStage,
+  isQualifiedFunnelStage,
+  nextActionForStage,
+} from "@/lib/sales/motion";
 import type { Lead } from "@/lib/sales/types";
 
 export type DashboardKpi = {
@@ -36,40 +43,16 @@ export type OverviewDashboard = {
   leadCount: number;
 };
 
-function stageFromLeadStatus(status: Lead["status"]): string {
-  switch (status) {
-    case "new":
-      return "New";
-    case "contacted":
-      return "Contacted";
-    case "qualified":
-      return "Qualified";
-    case "closed":
-      return "Closed";
-    default:
-      return status ?? "Unknown";
-  }
-}
-
 function priorityFromStatus(status: Lead["status"]): TodayQueueItem["priority"] {
-  if (status === "qualified") return "high";
-  if (status === "contacted") return "medium";
-  return "low";
-}
-
-function recommendationForLead(lead: Lead): string {
-  switch (lead.status) {
-    case "new":
-      return "Open the pre-call brief and start discovery while context is fresh.";
-    case "contacted":
-      return "Follow up on open questions and advance qualification.";
-    case "qualified":
-      return "Confirm next action and move the opportunity toward application.";
-    case "closed":
-      return "Archive outcome notes and capture learning signals.";
-    default:
-      return "Review prospect context and choose the next best action.";
+  if (isQualifiedFunnelStage(status)) return "high";
+  if (
+    status === "business_audit" ||
+    status === "problem_diagnosis" ||
+    status === "onboarding"
+  ) {
+    return "medium";
   }
+  return "low";
 }
 
 /**
@@ -77,11 +60,10 @@ function recommendationForLead(lead: Lead): string {
  * Values stay zero/empty when no activity exists — no fabricated production KPIs.
  */
 export function buildOverviewDashboard(leads: Lead[]): OverviewDashboard {
-  const active = leads.filter((lead) => lead.status !== "closed");
-  const qualified = leads.filter((lead) => lead.status === "qualified").length;
-  const contacted = leads.filter(
-    (lead) => lead.status === "contacted" || lead.status === "qualified",
-  ).length;
+  const active = leads.filter((lead) => isOpenFunnelStage(lead.status));
+  const qualified = leads.filter((lead) => isQualifiedFunnelStage(lead.status)).length;
+  const contacted = leads.filter((lead) => isConversationStage(lead.status)).length;
+  const proposals = leads.filter((lead) => lead.status === "proposal").length;
 
   const kpis: DashboardKpi[] = [
     {
@@ -106,11 +88,11 @@ export function buildOverviewDashboard(leads: Lead[]): OverviewDashboard {
       trend: qualified ? "up" : "flat",
     },
     {
-      id: "commitments",
-      label: "Applications / Commitments",
-      value: "0",
-      secondary: "Tracked after post-call outcomes",
-      trend: "flat",
+      id: "proposals",
+      label: "Proposals",
+      value: String(proposals),
+      secondary: proposals ? "In proposal stage" : "None in proposal yet",
+      trend: proposals ? "up" : "flat",
     },
     {
       id: "pipeline",
@@ -135,9 +117,9 @@ export function buildOverviewDashboard(leads: Lead[]): OverviewDashboard {
     contactName: lead.contactName?.trim() || "Unknown contact",
     companyName: lead.companyName,
     priority: priorityFromStatus(lead.status),
-    stage: stageFromLeadStatus(lead.status),
-    lastInteraction: lead.status === "new" ? "No interaction yet" : "Lead status updated",
-    recommendation: recommendationForLead(lead),
+    stage: funnelStageLabel(lead.status),
+    lastInteraction: lead.status === "lead" || !lead.status ? "No interaction yet" : "Funnel stage updated",
+    recommendation: nextActionForStage(lead.status),
     dueLabel: "Today",
     href: `/leads/${lead.id}`,
   }));
@@ -145,21 +127,21 @@ export function buildOverviewDashboard(leads: Lead[]): OverviewDashboard {
   const insights: AiInsight[] = [];
 
   for (const lead of active.slice(0, 3)) {
-    if (lead.status === "new") {
+    if (lead.status === "lead" || !lead.status) {
       insights.push({
         id: `insight-new-${lead.id}`,
         title: `${lead.contactName ?? lead.companyName} has no follow-up yet`,
-        detail: "High-intent prep: open the pre-call brief before first contact.",
+        detail: "Open the pre-call brief and start the business audit.",
         confidence: 0.72,
         kind: "action",
         href: `/leads/${lead.id}`,
       });
     }
-    if (lead.status === "qualified") {
+    if (isQualifiedFunnelStage(lead.status)) {
       insights.push({
         id: `insight-qual-${lead.id}`,
-        title: `${lead.companyName} is qualified and needs a next action`,
-        detail: "Confirm documents or commitment path while momentum is high.",
+        title: `${lead.companyName} is a qualified opportunity`,
+        detail: "Confirm implementation scope and move toward a proposal.",
         confidence: 0.81,
         kind: "opportunity",
         href: `/leads/${lead.id}`,

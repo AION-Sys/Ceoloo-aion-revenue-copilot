@@ -6,7 +6,7 @@ AI-assisted sales workspace for home-service contractors and SMB sales teams —
 [aion-software-factory: MISSION-002](https://github.com/Ceoloo/aion-software-factory/blob/main/missions/MISSION-002.md)
 
 ## Workflow (MVP)
-1. **Before conversation** — lead intelligence, pains, offer, recommended questions
+1. **Before conversation** — lead intelligence, workflow problems, systems, recommended AION service, qualification questions
 2. **During conversation** — guidance, checklist, objections, qualification, next-best action
 3. **After conversation** — structured outcome, CRM event, learning event
 

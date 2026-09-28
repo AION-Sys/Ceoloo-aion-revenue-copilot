@@ -14,7 +14,7 @@ describe("lead mappers", () => {
       company_name: "Acme HVAC",
       contact_name: "Jordan Lee",
       source: "outbound",
-      status: "new",
+      status: "lead",
       created_at: "2026-01-01T00:00:00Z",
       updated_at: "2026-01-01T00:00:00Z",
     });
@@ -28,21 +28,23 @@ describe("lead mappers", () => {
     const context = mapBusinessContextRow({
       id: "ctx-1",
       organization_id: "org-1",
-      industry: "home-services",
-      services: ["HVAC repair"],
-      likely_pains: ["slow lead response"],
-      relevant_offer: "conversion copilot trial",
+      industry: "home services",
+      existing_systems: ["spreadsheets", "QuickBooks"],
+      workflow_problems: ["manual lead follow-up"],
+      recommended_service: "workflow automation implementation",
       created_at: "2026-01-01T00:00:00Z",
       updated_at: "2026-01-01T00:00:00Z",
     });
 
-    expect(context.likelyPains).toEqual(["slow lead response"]);
-    expect(context.relevantOffer).toBe("conversion copilot trial");
+    expect(context.workflowProblems).toEqual(["manual lead follow-up"]);
+    expect(context.existingSystems).toEqual(["spreadsheets", "QuickBooks"]);
+    expect(context.recommendedService).toBe("workflow automation implementation");
   });
 
   it("creates a default business context when none is linked", () => {
     const context = createDefaultBusinessContext("org-1");
     expect(context.organizationId).toBe("org-1");
-    expect(context.likelyPains).toEqual([]);
+    expect(context.workflowProblems).toEqual([]);
+    expect(context.existingSystems).toEqual([]);
   });
 });

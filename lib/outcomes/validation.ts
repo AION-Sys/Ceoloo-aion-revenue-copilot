@@ -1,7 +1,9 @@
-import type { ObjectionRecord, QualificationState } from "@/lib/sales/types";
+import type { ObjectionRecord, QualificationProfile, QualificationState } from "@/lib/sales/types";
+import { QUALIFICATION_DIMENSIONS } from "@/lib/sales/motion";
 
 export type PostCallOutcomeInput = {
   qualification: QualificationState;
+  qualificationProfile?: QualificationProfile;
   painPoints: string[];
   objections: ObjectionRecord[];
   nextAction: string;
@@ -62,6 +64,26 @@ function parseObjections(value: unknown): ObjectionRecord[] {
   return objections;
 }
 
+const PROFILE_KEYS = QUALIFICATION_DIMENSIONS.map((dimension) => dimension.profileKey);
+
+function parseQualificationProfile(value: unknown): QualificationProfile | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return undefined;
+  }
+
+  const record = value as Record<string, unknown>;
+  const profile: QualificationProfile = {};
+
+  for (const key of PROFILE_KEYS) {
+    const raw = record[key];
+    if (typeof raw === "string" && raw.trim()) {
+      profile[key] = raw.trim();
+    }
+  }
+
+  return Object.keys(profile).length > 0 ? profile : undefined;
+}
+
 export function parsePostCallOutcomeInput(body: unknown): PostCallOutcomeInput | null {
   if (!body || typeof body !== "object") {
     return null;
@@ -69,6 +91,7 @@ export function parsePostCallOutcomeInput(body: unknown): PostCallOutcomeInput |
 
   const input = body as {
     qualification?: unknown;
+    qualificationProfile?: unknown;
     painPoints?: unknown;
     objections?: unknown;
     nextAction?: unknown;
@@ -83,8 +106,11 @@ export function parsePostCallOutcomeInput(body: unknown): PostCallOutcomeInput |
     return null;
   }
 
+  const qualificationProfile = parseQualificationProfile(input.qualificationProfile);
+
   return {
     qualification: input.qualification,
+    ...(qualificationProfile ? { qualificationProfile } : {}),
     painPoints: parseStringList(input.painPoints),
     objections: parseObjections(input.objections),
     nextAction: input.nextAction.trim(),

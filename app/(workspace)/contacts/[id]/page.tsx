@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getRepSession } from "@/lib/auth/session";
 import { getPreCallBriefForLead } from "@/lib/intelligence/brief";
+import { funnelStageLabel } from "@/lib/sales/motion";
 
 type ContactPageProps = {
   params: Promise<{ id: string }>;
@@ -59,7 +60,7 @@ export default async function ContactDetailPage({ params }: ContactPageProps) {
         <CardContent className="grid gap-3 text-sm sm:grid-cols-2">
           <div>
             <p className="text-xs text-muted-foreground">Stage</p>
-            <p className="capitalize">{lead.status}</p>
+            <p>{funnelStageLabel(lead.status)}</p>
           </div>
           <div>
             <p className="text-xs text-muted-foreground">Source</p>
@@ -70,15 +71,19 @@ export default async function ContactDetailPage({ params }: ContactPageProps) {
             <p>{context.industry}</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Offer</p>
-            <p>{context.relevantOffer ?? "—"}</p>
+            <p className="text-xs text-muted-foreground">Existing systems</p>
+            <p>{context.existingSystems.join(", ") || "—"}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Recommended AION service</p>
+            <p>{context.recommendedService ?? "—"}</p>
           </div>
         </CardContent>
       </Card>
 
       <EmptyState
         title="Relationship timeline"
-        description="Calls, emails, documents, notes, applications, and follow-ups will appear chronologically here."
+        description="Calls, emails, notes, proposals, and follow-ups will appear chronologically here."
       />
     </div>
   );

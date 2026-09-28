@@ -3,6 +3,7 @@ import { EmptyState } from "@/components/primitives/EmptyState";
 import { Button } from "@/components/ui/button";
 import { getRepSession } from "@/lib/auth/session";
 import { listLeadsForOrganization } from "@/lib/leads/repository";
+import { funnelStageLabel } from "@/lib/sales/motion";
 
 export default async function ContactsPage() {
   const repSession = await getRepSession();
@@ -46,7 +47,7 @@ export default async function ContactsPage() {
                 <tr key={lead.id} className="hover:bg-muted/30">
                   <td className="px-3 py-2.5">{lead.contactName ?? "—"}</td>
                   <td className="px-3 py-2.5">{lead.companyName}</td>
-                  <td className="px-3 py-2.5 capitalize">{lead.status}</td>
+                  <td className="px-3 py-2.5">{funnelStageLabel(lead.status)}</td>
                   <td className="px-3 py-2.5 text-muted-foreground">You</td>
                   <td className="px-3 py-2.5">
                     <Button asChild size="sm" variant="outline">

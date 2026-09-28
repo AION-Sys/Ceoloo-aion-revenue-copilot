@@ -3,7 +3,12 @@
  * Task 1 — schema + RLS (Builder).
  */
 
-import type { ObjectionRecord, QualificationState } from "@/lib/sales/types";
+import type {
+  FunnelStage,
+  ObjectionRecord,
+  QualificationProfile,
+  QualificationState,
+} from "@/lib/sales/types";
 
 export type OrganizationRow = {
   id: string;
@@ -24,14 +29,14 @@ export type BusinessContextRow = {
   id: string;
   organization_id: string;
   industry: string;
-  services: string[];
-  likely_pains: string[];
-  relevant_offer: string | null;
+  existing_systems: string[];
+  workflow_problems: string[];
+  recommended_service: string | null;
   created_at: string;
   updated_at: string;
 };
 
-export type LeadStatus = "new" | "contacted" | "qualified" | "closed";
+export type LeadStatus = FunnelStage;
 
 export type LeadRow = {
   id: string;
@@ -64,6 +69,7 @@ export type CallOutcomeRow = {
   objections: ObjectionRecord[];
   next_action: string;
   transcript_summary: string | null;
+  qualification_profile: QualificationProfile;
   created_at: string;
 };
 

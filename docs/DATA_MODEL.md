@@ -9,14 +9,16 @@ Relational model in Postgres (Supabase) for leads, business context, calls, outc
 ## Entities
 
 ### `business_contexts`
+Prospect workflow context for AION's implementation motion. Not a funding application.
+
 | Column | Type | Notes |
 |--------|------|-------|
 | id | uuid PK | |
 | organization_id | uuid FK | Tenant boundary |
-| industry | text | e.g. home-services |
-| services | jsonb | string[] |
-| likely_pains | jsonb | string[] |
-| relevant_offer | text | nullable |
+| industry | text | Prospect industry |
+| existing_systems | jsonb | string[] — tools already in the workflow |
+| workflow_problems | jsonb | string[] — current workflow problems |
+| recommended_service | text | nullable — recommended AION service |
 | created_at | timestamptz | |
 | updated_at | timestamptz | |
 
@@ -29,7 +31,7 @@ Relational model in Postgres (Supabase) for leads, business context, calls, outc
 | company_name | text | |
 | contact_name | text | nullable |
 | source | text | outbound, inbound, etc. |
-| status | text | new, contacted, qualified, closed |
+| status | text | lead, business_audit, problem_diagnosis, qualified_opportunity, solution_scope, proposal, closed_won, onboarding |
 | created_at | timestamptz | |
 | updated_at | timestamptz | |
 
@@ -49,7 +51,8 @@ Relational model in Postgres (Supabase) for leads, business context, calls, outc
 | id | uuid PK | |
 | call_id | uuid FK | unique |
 | qualification | text | unqualified, exploring, qualified, disqualified |
-| pain_points | jsonb | string[] |
+| qualification_profile | jsonb | AION dimensions: currentWorkflow, businessImpact, existingSystems, automationOpportunity, decisionMaker, implementationReadiness, urgencyTimeline, budgetFit, recommendedService |
+| pain_points | jsonb | string[] — workflow problems heard on the call |
 | objections | jsonb | ObjectionRecord[] |
 | next_action | text | |
 | transcript_summary | text | nullable |
@@ -83,6 +86,10 @@ Domain types live in `lib/sales/types.ts`. Keep DB columns aligned with those ty
   "lead_id": "uuid",
   "call_id": "uuid",
   "qualification": "exploring",
+  "qualification_profile": {
+    "currentWorkflow": "Jobs are tracked in a spreadsheet",
+    "recommendedService": "workflow automation implementation"
+  },
   "objection_count": 2,
   "pain_point_count": 3,
   "next_action": "send proposal",
@@ -111,3 +118,4 @@ Domain types live in `lib/sales/types.ts`. Keep DB columns aligned with those ty
 4. calls
 5. call_outcomes
 6. event_log
+7. `20260927120000_aion_sales_motion.sql` — funnel statuses, workflow context columns, qualification profile
