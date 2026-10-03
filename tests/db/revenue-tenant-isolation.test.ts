@@ -287,6 +287,18 @@ describe.skipIf(!adminUrl)("revenue tenant isolation (Postgres)", () => {
     ).rejects.toThrow(/organization_id/);
   });
 
+  it("does not widen RPC access: service-only functions stay service-only", async () => {
+    const { rows } = await db.query(`
+      select has_function_privilege('authenticated', 'public.revex_mark_collected(text,text,text,text)', 'execute') as authenticated,
+             has_function_privilege('anon', 'public.revex_mark_collected(text,text,text,text)', 'execute') as anon,
+             has_function_privilege('service_role', 'public.revex_mark_collected(text,text,text,text)', 'execute') as service
+    `);
+    expect(rows[0]).toEqual({ authenticated: false, anon: false, service: true });
+    await expect(
+      asA((c) => c.query("select public.revex_mark_collected('REV-1', 'bank', 'ref', 'human_operator')")),
+    ).rejects.toThrow(/permission denied/);
+  });
+
   it("is safe to re-apply", async () => {
     await db.query(read(ISOLATION_MIGRATION));
     const { rows } = await db.query(`

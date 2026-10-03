@@ -527,8 +527,15 @@ begin
        and p.prokind = 'f'
        and (p.proname like 'revex\_%' or p.proname in ('apply_revenue_control_command', 'create_revenue_lead'))
   loop
-    -- Keep the signed-in and service paths explicit before dropping PUBLIC.
-    execute format('grant execute on function %s to authenticated, service_role', v_fn);
+    -- Keep existing signed-in and service paths explicit before dropping
+    -- PUBLIC, without granting anything a role did not already have (for
+    -- example revex_mark_collected, which is service-only).
+    if has_function_privilege('authenticated', v_fn, 'execute') then
+      execute format('grant execute on function %s to authenticated', v_fn);
+    end if;
+    if has_function_privilege('service_role', v_fn, 'execute') then
+      execute format('grant execute on function %s to service_role', v_fn);
+    end if;
     execute format('revoke execute on function %s from public, anon', v_fn);
   end loop;
 end;
