@@ -379,3 +379,14 @@ $function$;
 -- Live grants on the two lead RPCs: no anon, signed-in users allowed.
 revoke all on function public.revex_open_work(text,text,text,text,text,text,jsonb) from public, anon;
 revoke all on function public.revex_clear_legacy_status(text,text) from public, anon;
+
+-- Service-only definer RPC (live: no EXECUTE for anon or authenticated).
+create or replace function public.revex_mark_collected(p_revenue_event_id text, p_evidence_type text, p_evidence_ref text, p_verified_by text)
+returns void language plpgsql security definer set search_path = public as $$
+begin
+  perform set_config('revex.allow_collect', 'on', true);
+  update public.revenue_events set revenue_status = 'collected', verified_by = p_verified_by
+   where revenue_event_id = p_revenue_event_id;
+end;
+$$;
+revoke all on function public.revex_mark_collected(text,text,text,text) from public, anon, authenticated;
