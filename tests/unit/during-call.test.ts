@@ -1,7 +1,16 @@
-import { describe, expect, it } from "vitest";
-import { buildDuringCallGuidance } from "@/lib/intelligence/during-call";
+import { afterEach, describe, expect, it } from "vitest";
+import {
+  buildDuringCallGuidance,
+  generateDuringCallGuidance,
+} from "@/lib/intelligence/during-call";
 import { buildAgentSystemPrompt } from "@/lib/sales/motion";
 import type { BusinessContext, Lead } from "@/lib/sales/types";
+
+const originalEnv = { ...process.env };
+
+afterEach(() => {
+  process.env = { ...originalEnv };
+});
 
 const lead: Lead = {
   id: "lead-1",
@@ -51,5 +60,25 @@ describe("buildDuringCallGuidance", () => {
     });
 
     expect(guidance.objectionReframe).toContain("cost");
+  });
+});
+
+describe("generateDuringCallGuidance + decision adapter", () => {
+  it("attaches switchable discrete decision scores", async () => {
+    process.env.AION_DECISION_ADAPTER = "heuristic";
+    delete process.env.AION_AI_GATEWAY_URL;
+    delete process.env.AION_AI_GATEWAY_API_KEY;
+
+    const guidance = await generateDuringCallGuidance({
+      lead,
+      context,
+      objection: "We're too busy to change workflows",
+    });
+
+    expect(guidance.decisionAdapterId).toBe("heuristic");
+    expect(guidance.nextBestActionDecision?.decisionType).toBe("sales.next_best_action");
+    expect(guidance.objectionDecision?.decisionType).toBe("sales.objection_handling");
+    expect(guidance.objectionReframe).toMatch(/Strategy \(heuristic\)/);
+    expect(guidance.nextBestAction.length).toBeGreaterThan(0);
   });
 });
