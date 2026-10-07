@@ -22,7 +22,7 @@ export function PriorityBadge({ priority, className }: PriorityBadgeProps) {
   return (
     <Badge
       variant={PRIORITY_VARIANT[priority]}
-      className={cn("font-medium", className)}
+      className={cn("rounded-sm font-medium", className)}
     >
       {PRIORITY_LABEL[priority]}
     </Badge>

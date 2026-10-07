@@ -20,16 +20,18 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-start gap-3 rounded-xl border border-dashed p-6",
+        "flex flex-col items-start gap-3 rounded-lg border border-dashed border-border/80 bg-background/40 p-6",
         className,
       )}
     >
       <div className="space-y-1">
-        <h3 className="text-sm font-semibold">{title}</h3>
-        <p className="max-w-md text-sm text-muted-foreground">{description}</p>
+        <h3 className="text-sm font-semibold tracking-tight">{title}</h3>
+        <p className="max-w-md text-sm leading-relaxed text-muted-foreground">
+          {description}
+        </p>
       </div>
       {actionLabel && actionHref ? (
-        <Button asChild size="sm">
+        <Button asChild size="sm" className="active:scale-[0.98]">
           <Link href={actionHref}>{actionLabel}</Link>
         </Button>
       ) : null}

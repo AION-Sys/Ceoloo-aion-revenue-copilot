@@ -39,7 +39,7 @@ export function AppShell({
   }, []);
 
   return (
-    <div className="flex min-h-svh bg-background text-foreground">
+    <div className="cockpit-shell flex min-h-svh text-foreground">
       <AppSidebar
         collapsed={collapsed}
         onToggle={() => setCollapsed((value) => !value)}
@@ -54,7 +54,9 @@ export function AppShell({
           onOpenCommand={() => setCommandOpen(true)}
           onOpenQuickAdd={() => setQuickAddOpen(true)}
         />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto px-4 py-5 md:px-7 md:py-7">
+          {children}
+        </main>
       </div>
       <CommandPalette
         open={commandOpen}
