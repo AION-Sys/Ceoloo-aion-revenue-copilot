@@ -19,18 +19,24 @@ export function AIInsightCard({ insight, className }: AIInsightCardProps) {
   const body = (
     <article
       className={cn(
-        "rounded-lg border border-border/80 bg-background/60 p-3 transition-colors hover:bg-muted/40",
+        "interactive-row rounded-md border border-border/70 bg-background/50 p-3",
         className,
       )}
     >
       <div className="mb-2 flex items-center gap-2">
-        <Badge variant={KIND_VARIANT[insight.kind]}>{insight.kind}</Badge>
-        <span className="text-xs text-muted-foreground">
-          {Math.round(insight.confidence * 100)}% confidence
+        <Badge variant={KIND_VARIANT[insight.kind]} className="rounded-sm">
+          {insight.kind}
+        </Badge>
+        <span className="font-mono text-[11px] tabular text-muted-foreground">
+          {Math.round(insight.confidence * 100)}%
         </span>
       </div>
-      <h4 className="text-sm font-medium leading-snug">{insight.title}</h4>
-      <p className="mt-1 text-xs text-muted-foreground">{insight.detail}</p>
+      <h4 className="text-sm font-semibold leading-snug tracking-tight">
+        {insight.title}
+      </h4>
+      <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+        {insight.detail}
+      </p>
     </article>
   );
 

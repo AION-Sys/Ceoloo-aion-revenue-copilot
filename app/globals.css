@@ -4,67 +4,191 @@
 
 @layer base {
   :root {
-    --background: 40 20% 98%;
-    --foreground: 220 20% 10%;
-    --card: 0 0% 100%;
-    --card-foreground: 220 20% 10%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 10%;
-    --primary: 220 18% 16%;
-    --primary-foreground: 40 20% 98%;
-    --secondary: 40 12% 94%;
-    --secondary-foreground: 220 18% 16%;
-    --muted: 40 10% 94%;
-    --muted-foreground: 220 8% 42%;
-    --accent: 40 12% 93%;
-    --accent-foreground: 220 18% 16%;
-    --destructive: 0 72% 48%;
+    /* Steel Command — cool graphite, single teal signal */
+    --background: 210 24% 97%;
+    --foreground: 215 32% 12%;
+    --card: 210 30% 99%;
+    --card-foreground: 215 32% 12%;
+    --popover: 210 30% 99%;
+    --popover-foreground: 215 32% 12%;
+    --primary: 215 28% 14%;
+    --primary-foreground: 210 24% 98%;
+    --secondary: 210 18% 93%;
+    --secondary-foreground: 215 28% 14%;
+    --muted: 210 16% 93%;
+    --muted-foreground: 215 12% 40%;
+    --accent: 210 18% 92%;
+    --accent-foreground: 215 28% 14%;
+    --destructive: 0 68% 46%;
     --destructive-foreground: 0 0% 100%;
-    --success: 152 55% 32%;
+    --success: 158 48% 30%;
     --success-foreground: 0 0% 100%;
-    --warning: 36 90% 40%;
+    --warning: 32 86% 38%;
     --warning-foreground: 0 0% 100%;
-    --ai: 198 70% 36%;
+    --ai: 192 72% 32%;
     --ai-foreground: 0 0% 100%;
-    --border: 40 10% 88%;
-    --input: 40 10% 88%;
-    --ring: 220 18% 16%;
-    --radius: 0.625rem;
+    --border: 214 18% 86%;
+    --input: 214 18% 86%;
+    --ring: 192 72% 32%;
+    --radius: 0.55rem;
+    --shadow-tint: 215 28% 20%;
+    --grid-line: 214 18% 88%;
   }
 
   .dark {
-    --background: 220 18% 7%;
-    --foreground: 40 15% 96%;
-    --card: 220 16% 10%;
-    --card-foreground: 40 15% 96%;
-    --popover: 220 16% 10%;
-    --popover-foreground: 40 15% 96%;
-    --primary: 40 15% 96%;
-    --primary-foreground: 220 18% 10%;
-    --secondary: 220 14% 15%;
-    --secondary-foreground: 40 15% 96%;
-    --muted: 220 14% 15%;
-    --muted-foreground: 220 8% 62%;
-    --accent: 220 14% 16%;
-    --accent-foreground: 40 15% 96%;
-    --destructive: 0 62% 50%;
+    --background: 215 28% 7%;
+    --foreground: 210 20% 96%;
+    --card: 215 24% 10%;
+    --card-foreground: 210 20% 96%;
+    --popover: 215 24% 10%;
+    --popover-foreground: 210 20% 96%;
+    --primary: 210 20% 96%;
+    --primary-foreground: 215 28% 10%;
+    --secondary: 215 18% 15%;
+    --secondary-foreground: 210 20% 96%;
+    --muted: 215 18% 15%;
+    --muted-foreground: 215 10% 64%;
+    --accent: 215 18% 16%;
+    --accent-foreground: 210 20% 96%;
+    --destructive: 0 58% 48%;
     --destructive-foreground: 0 0% 100%;
-    --success: 152 45% 42%;
-    --success-foreground: 0 0% 100%;
-    --warning: 36 85% 48%;
-    --warning-foreground: 220 18% 10%;
-    --ai: 198 65% 48%;
-    --ai-foreground: 220 18% 10%;
-    --border: 220 12% 18%;
-    --input: 220 12% 18%;
-    --ring: 40 15% 80%;
+    --success: 158 40% 42%;
+    --success-foreground: 215 28% 8%;
+    --warning: 32 80% 48%;
+    --warning-foreground: 215 28% 8%;
+    --ai: 192 62% 48%;
+    --ai-foreground: 215 28% 8%;
+    --border: 215 16% 18%;
+    --input: 215 16% 18%;
+    --ring: 192 62% 48%;
+    --shadow-tint: 215 40% 4%;
+    --grid-line: 215 16% 16%;
   }
 
   * {
     @apply border-border;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     @apply bg-background text-foreground antialiased;
+    font-feature-settings: "ss01" on, "cv11" on;
+    text-wrap: pretty;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+}
+
+@layer components {
+  .cockpit-shell {
+    position: relative;
+    isolation: isolate;
+    background-color: hsl(var(--background));
+    background-image:
+      linear-gradient(180deg, hsl(var(--background)) 0%, transparent 42%),
+      linear-gradient(hsl(var(--grid-line) / 0.55) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--grid-line) / 0.55) 1px, transparent 1px);
+    background-size: auto, 48px 48px, 48px 48px;
+    background-position: 0 0, -1px -1px, -1px -1px;
+  }
+
+  .cockpit-shell::before {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .cockpit-shell > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .cockpit-panel {
+    @apply rounded-lg border bg-card/90 backdrop-blur-[2px];
+    box-shadow: 0 1px 0 hsl(var(--shadow-tint) / 0.04),
+      0 12px 28px -18px hsl(var(--shadow-tint) / 0.35);
+  }
+
+  .cockpit-enter {
+    animation: cockpit-enter 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .cockpit-stagger > * {
+    animation: cockpit-enter 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .cockpit-stagger > *:nth-child(1) {
+    animation-delay: 0.02s;
+  }
+  .cockpit-stagger > *:nth-child(2) {
+    animation-delay: 0.08s;
+  }
+  .cockpit-stagger > *:nth-child(3) {
+    animation-delay: 0.14s;
+  }
+  .cockpit-stagger > *:nth-child(4) {
+    animation-delay: 0.2s;
+  }
+  .cockpit-stagger > *:nth-child(5) {
+    animation-delay: 0.26s;
+  }
+  .cockpit-stagger > *:nth-child(6) {
+    animation-delay: 0.32s;
+  }
+
+  .interactive-row {
+    @apply cursor-pointer transition-[transform,background-color,border-color] duration-200;
+  }
+
+  .interactive-row:hover {
+    @apply bg-muted/55;
+    transform: translateY(-1px);
+  }
+
+  .interactive-row:active {
+    transform: translateY(0) scale(0.992);
+  }
+
+  .nav-active-rail {
+    box-shadow: inset 3px 0 0 hsl(var(--ai));
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@keyframes cockpit-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes kpi-sheen {
+  from {
+    background-position: 120% 0;
+  }
+  to {
+    background-position: -20% 0;
   }
 }

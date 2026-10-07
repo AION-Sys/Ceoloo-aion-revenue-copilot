@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { CrmApprovalPanel } from "@/components/cockpit/CrmApprovalPanel";
+import { LineageTrail } from "@/components/cockpit/LineageTrail";
 import { PostCallOutcomeForm } from "@/components/PostCallOutcomeForm";
 import { EmptyState } from "@/components/primitives/EmptyState";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { readDemoSessionFromCookies } from "@/lib/auth/demo";
 import { getRepSession } from "@/lib/auth/session";
 import { getCallWithLead } from "@/lib/calls/repository";
+import { buildCrmProposalsFromOutcome } from "@/lib/cockpit/crm-proposals";
+import { DEMO_CRM_PROPOSALS, isDemoOrganization } from "@/lib/cockpit/demo";
+import { buildFollowUpDraftFromOutcome } from "@/lib/cockpit/follow-up";
+import { buildLineageTrail } from "@/lib/cockpit/lineage";
 import { generateDuringCallGuidance } from "@/lib/intelligence/during-call";
 import { getBusinessContextForLead } from "@/lib/leads/repository";
 import { getOutcomeByCallId } from "@/lib/outcomes/repository";
@@ -55,6 +61,39 @@ export default async function CallReviewPage({ params }: ReviewPageProps) {
     ? mapCallOutcomeRow(existingRow, callWithLead.lead.id)
     : undefined;
 
+  const demo = isDemoOrganization(callWithLead.lead.organizationId);
+  const proposals = initialOutcome
+    ? buildCrmProposalsFromOutcome({
+        lead: callWithLead.lead,
+        outcome: initialOutcome,
+      })
+    : demo
+      ? DEMO_CRM_PROPOSALS
+      : [];
+
+  const followUpPreview = initialOutcome
+    ? buildFollowUpDraftFromOutcome({
+        lead: callWithLead.lead,
+        outcome: initialOutcome,
+      })
+    : null;
+
+  const lineage = buildLineageTrail({
+    leadId: callWithLead.lead.id,
+    hasConversation: true,
+    hasEvidence: Boolean(
+      initialOutcome?.painPoints.length ||
+        initialOutcome?.objections.length ||
+        context.workflowProblems.length,
+    ),
+    recommendation: initialOutcome?.nextAction || guidance.nextBestAction,
+    repDecision: initialOutcome
+      ? `Outcome saved as ${initialOutcome.qualification}`
+      : "Capture and save the structured outcome",
+    crmProposal: proposals[0] ?? null,
+    outcome: initialOutcome ?? null,
+  });
+
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6">
       <div>
@@ -76,8 +115,7 @@ export default async function CallReviewPage({ params }: ReviewPageProps) {
           Post-call review · {callWithLead.lead.companyName}
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Capture structured outcome — qualification, workflow problems, objections, and next action —
-          before CRM and learning ingest (Tasks 7–8).
+          Capture structured outcome, review CRM drafts, and keep draft≠confirmed clear.
         </p>
       </div>
 
@@ -99,16 +137,6 @@ export default async function CallReviewPage({ params }: ReviewPageProps) {
               ))}
             </div>
           ) : null}
-          {guidance.checklist.length > 0 ? (
-            <div>
-              <p className="mb-1 text-xs text-muted-foreground">Discovery checklist cues</p>
-              <ul className="list-disc space-y-1 pl-4 text-muted-foreground">
-                {guidance.checklist.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
         </CardContent>
       </Card>
 
@@ -124,6 +152,37 @@ export default async function CallReviewPage({ params }: ReviewPageProps) {
         suggestedNextAction={initialOutcome ? undefined : guidance.nextBestAction}
         canPersist={supabaseReady}
       />
+
+      <CrmApprovalPanel initialProposals={proposals} />
+
+      <LineageTrail trail={lineage} />
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Follow-up draft preview</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm">
+          {followUpPreview ? (
+            <>
+              <p className="font-medium">{followUpPreview.subject}</p>
+              <pre className="whitespace-pre-wrap rounded-lg border bg-muted/30 p-3 text-xs">
+                {followUpPreview.body}
+              </pre>
+              <p className="text-xs text-muted-foreground">
+                Draft only. Approve and confirm send in{" "}
+                <Link href="/follow-up" className="text-ai hover:underline">
+                  Follow-Up
+                </Link>
+                .
+              </p>
+            </>
+          ) : (
+            <p className="text-muted-foreground">
+              Save an outcome to generate a follow-up draft. Nothing is sent from this screen.
+            </p>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

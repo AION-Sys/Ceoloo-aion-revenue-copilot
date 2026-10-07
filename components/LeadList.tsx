@@ -21,7 +21,7 @@ export function LeadList({ leads }: LeadListProps) {
       <ul className="lead-list-items">
         {leads.map((lead) => (
           <li key={lead.id}>
-            <Link href={`/leads/${lead.id}`} className="lead-link">
+            <Link href={`/prospects/${lead.id}`} className="lead-link">
               <span className="lead-company">{lead.companyName}</span>
               {lead.contactName ? (
                 <span className="lead-contact">{lead.contactName}</span>

@@ -2,14 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import {
-  Brain,
+  BookOpen,
   LayoutDashboard,
+  Mail,
   Phone,
   Plus,
-  SquareKanban,
-  CheckSquare,
   Sparkles,
-  UserPlus,
+  Users,
 } from "lucide-react";
 import {
   CommandDialog,
@@ -41,29 +40,29 @@ export function CommandPalette({
 
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange}>
-      <CommandInput placeholder="Search leads, calls, contacts, or jump…" />
+      <CommandInput placeholder="Jump to Today, Prospects, Calls, Follow-Up…" />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
-        <CommandGroup heading="Navigate">
+        <CommandGroup heading="Command center">
           <CommandItem onSelect={() => run("/dashboard")}>
             <LayoutDashboard className="h-4 w-4" />
-            Go to dashboard
+            Today
+          </CommandItem>
+          <CommandItem onSelect={() => run("/prospects")}>
+            <Users className="h-4 w-4" />
+            Prospects
           </CommandItem>
           <CommandItem onSelect={() => run("/calls")}>
             <Phone className="h-4 w-4" />
-            Open calls
+            Calls
           </CommandItem>
-          <CommandItem onSelect={() => run("/pipeline")}>
-            <SquareKanban className="h-4 w-4" />
-            Open pipeline
+          <CommandItem onSelect={() => run("/follow-up")}>
+            <Mail className="h-4 w-4" />
+            Follow-Up
           </CommandItem>
-          <CommandItem onSelect={() => run("/tasks")}>
-            <CheckSquare className="h-4 w-4" />
-            Open tasks
-          </CommandItem>
-          <CommandItem onSelect={() => run("/intelligence")}>
-            <Brain className="h-4 w-4" />
-            Ask Copilot / Intelligence
+          <CommandItem onSelect={() => run("/learning")}>
+            <BookOpen className="h-4 w-4" />
+            Learning
           </CommandItem>
         </CommandGroup>
         <CommandSeparator />
@@ -77,17 +76,9 @@ export function CommandPalette({
             <Plus className="h-4 w-4" />
             Quick add
           </CommandItem>
-          <CommandItem onSelect={() => run("/calls")}>
-            <Phone className="h-4 w-4" />
-            Start call
-          </CommandItem>
-          <CommandItem onSelect={() => run("/contacts")}>
-            <UserPlus className="h-4 w-4" />
-            Add lead / contact
-          </CommandItem>
-          <CommandItem onSelect={() => run("/tasks")}>
+          <CommandItem onSelect={() => run("/prospects")}>
             <Sparkles className="h-4 w-4" />
-            Generate follow-up
+            Open call prep from prospect
           </CommandItem>
         </CommandGroup>
       </CommandList>

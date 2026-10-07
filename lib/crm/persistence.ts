@@ -1,12 +1,10 @@
-import type {
-  CallOutcome,
-  CrmEvent,
-  LeadStatus,
-  QualificationState,
-} from "@/lib/sales/types";
+import type { CallOutcome, CrmEvent } from "@/lib/sales/types";
+import { qualificationToLeadStatus } from "@/lib/crm/status";
 import type { Database, EventLogRow } from "@/lib/supabase/database.types";
 import { getSupabasePublicEnv } from "@/lib/supabase/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+
+export { qualificationToLeadStatus } from "@/lib/crm/status";
 
 type EventLogInsert = Database["public"]["Tables"]["event_log"]["Insert"];
 type LeadUpdate = Database["public"]["Tables"]["leads"]["Update"];
@@ -57,22 +55,6 @@ export function outcomeToCrmEvent(outcome: CallOutcome): CrmEvent {
     },
     occurredAt: outcome.occurredAt,
   };
-}
-
-/**
- * Maps post-call qualification onto CRM lead status (AION FunnelStage).
- * Aligns with legacy status normalization in lib/sales/motion.ts.
- */
-export function qualificationToLeadStatus(qualification: QualificationState): LeadStatus {
-  switch (qualification) {
-    case "qualified":
-      return "qualified_opportunity";
-    case "disqualified":
-      return "closed_won";
-    case "exploring":
-    case "unqualified":
-      return "business_audit";
-  }
 }
 
 /**

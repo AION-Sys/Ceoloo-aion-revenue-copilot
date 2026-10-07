@@ -24,7 +24,7 @@ describe("buildOverviewDashboard", () => {
     const overview = buildOverviewDashboard([baseLead]);
     expect(overview.leadCount).toBe(1);
     expect(overview.todayQueue).toHaveLength(1);
-    expect(overview.todayQueue[0]?.href).toBe("/leads/lead-1");
+    expect(overview.todayQueue[0]?.href).toBe("/prospects/lead-1");
     expect(overview.insights.some((insight) => insight.kind === "action")).toBe(true);
   });
 

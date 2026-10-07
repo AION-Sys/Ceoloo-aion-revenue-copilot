@@ -50,25 +50,29 @@ export function AppSidebar({
     <TooltipProvider delayDuration={0}>
       <aside
         className={cn(
-          "sticky top-0 flex h-svh shrink-0 flex-col border-r bg-card transition-[width] duration-200",
+          "sticky top-0 flex h-svh shrink-0 flex-col border-r border-border/80 bg-card/80 backdrop-blur-sm transition-[width] duration-200 ease-cockpit",
           collapsed ? "w-[68px]" : "w-[248px]",
         )}
       >
         <div
           className={cn(
-            "flex h-14 items-center border-b px-3",
+            "flex h-14 items-center border-b border-border/80 px-3",
             collapsed ? "justify-center" : "justify-between gap-2",
           )}
         >
           {!collapsed ? (
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold tracking-tight">AION</p>
-              <p className="truncate text-xs text-muted-foreground">
+              <p className="truncate text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                AION
+              </p>
+              <p className="truncate text-sm font-semibold tracking-tight">
                 Revenue Copilot
               </p>
             </div>
           ) : (
-            <span className="text-sm font-semibold">A</span>
+            <span className="font-mono text-sm font-semibold tracking-tight text-ai">
+              RC
+            </span>
           )}
           <Button
             type="button"
@@ -90,7 +94,7 @@ export function AppSidebar({
           {APP_NAV.map((section) => (
             <div key={section.label}>
               {!collapsed ? (
-                <p className="mb-1 px-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                <p className="mb-1.5 px-2 text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
                   {section.label}
                 </p>
               ) : null}
@@ -103,14 +107,19 @@ export function AppSidebar({
                     <Link
                       href={item.href}
                       className={cn(
-                        "flex items-center gap-2 rounded-md px-2 py-2 text-sm transition-colors",
+                        "group flex items-center gap-2 rounded-md px-2 py-2 text-sm transition-[background-color,color,transform] duration-200 ease-cockpit",
                         active
-                          ? "bg-accent text-accent-foreground"
-                          : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                          ? "nav-active-rail bg-ai/10 font-medium text-foreground"
+                          : "text-muted-foreground hover:bg-muted/70 hover:text-foreground",
                         collapsed && "justify-center px-0",
                       )}
                     >
-                      <item.icon className="h-4 w-4 shrink-0" />
+                      <item.icon
+                        className={cn(
+                          "h-4 w-4 shrink-0 transition-colors",
+                          active ? "text-ai" : "text-muted-foreground group-hover:text-foreground",
+                        )}
+                      />
                       {!collapsed ? <span>{item.title}</span> : null}
                     </Link>
                   );
@@ -133,7 +142,7 @@ export function AppSidebar({
           ))}
         </nav>
 
-        <div className="border-t p-2">
+        <div className="border-t border-border/80 p-2">
           <div
             className={cn(
               "mb-1 flex items-center gap-1",
@@ -153,12 +162,14 @@ export function AppSidebar({
               <button
                 type="button"
                 className={cn(
-                  "flex w-full items-center gap-2 rounded-md border px-2 py-2 text-left hover:bg-muted",
+                  "flex w-full cursor-pointer items-center gap-2 rounded-md border border-border/80 px-2 py-2 text-left transition-colors hover:bg-muted/70",
                   collapsed && "justify-center border-0 px-0",
                 )}
               >
-                <Avatar className="h-7 w-7">
-                  <AvatarFallback>{initialsFromName(repName)}</AvatarFallback>
+                <Avatar className="h-7 w-7 rounded-md">
+                  <AvatarFallback className="rounded-md bg-secondary text-[11px] font-semibold">
+                    {initialsFromName(repName)}
+                  </AvatarFallback>
                 </Avatar>
                 {!collapsed ? (
                   <>

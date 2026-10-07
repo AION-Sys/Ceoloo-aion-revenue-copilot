@@ -1,21 +1,28 @@
 import { startCallForLead } from "@/lib/leads/actions";
+import { buildCallPrepSurface } from "@/lib/cockpit/prep";
+import { scoreQualificationCompleteness } from "@/lib/cockpit/qualification";
 import { funnelStageLabel } from "@/lib/sales/motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import type { PreCallBrief } from "@/lib/intelligence/pre-call";
+import type { QualificationProfile } from "@/lib/sales/types";
 
 type PreCallBriefPanelProps = {
   brief: PreCallBrief;
+  profile?: QualificationProfile;
 };
 
-export function PreCallBriefPanel({ brief }: PreCallBriefPanelProps) {
-  const { lead, context, recommendedQuestions } = brief;
+export function PreCallBriefPanel({ brief, profile }: PreCallBriefPanelProps) {
+  const { lead, context } = brief;
+  const prep = buildCallPrepSurface({ lead, context, profile });
+  const completeness = scoreQualificationCompleteness(profile);
 
   return (
     <section className="space-y-4">
       <header>
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Pre-call brief
+          Call prep
         </p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight">
           {lead.companyName}
@@ -26,6 +33,16 @@ export function PreCallBriefPanel({ brief }: PreCallBriefPanelProps) {
           </p>
         ) : null}
       </header>
+
+      <Card className="border-ai/20">
+        <CardHeader>
+          <CardTitle>Conversation objective</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm leading-relaxed">{prep.objective}</p>
+          <p className="mt-3 text-xs text-muted-foreground">{prep.positioning}</p>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-3 md:grid-cols-3">
         <Card>
@@ -41,6 +58,43 @@ export function PreCallBriefPanel({ brief }: PreCallBriefPanelProps) {
           </CardContent>
         </Card>
 
+        <Card>
+          <CardHeader>
+            <CardTitle>Likely objections</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="list-disc space-y-1 pl-4 text-sm text-muted-foreground">
+              {prep.likelyObjections.map((objection) => (
+                <li key={objection}>{objection}</li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Qualification gaps</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">Completeness</span>
+              <span className="font-medium">{completeness.percent}%</span>
+            </div>
+            <Progress value={completeness.percent} />
+            {prep.missingInformation.length > 0 ? (
+              <ul className="list-disc space-y-1 pl-4 text-sm text-muted-foreground">
+                {prep.missingInformation.slice(0, 5).map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground">Qualification profile looks complete.</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Workflow problems</CardTitle>
@@ -81,7 +135,7 @@ export function PreCallBriefPanel({ brief }: PreCallBriefPanelProps) {
         </CardHeader>
         <CardContent>
           <ol className="list-decimal space-y-1 pl-4 text-sm">
-            {recommendedQuestions.map((question) => (
+            {prep.recommendedQuestions.map((question) => (
               <li key={question}>{question}</li>
             ))}
           </ol>
@@ -89,7 +143,7 @@ export function PreCallBriefPanel({ brief }: PreCallBriefPanelProps) {
       </Card>
 
       <form action={startCallForLead.bind(null, lead.id)}>
-        <Button type="submit">Start call</Button>
+        <Button type="submit">Start live call</Button>
       </form>
     </section>
   );
