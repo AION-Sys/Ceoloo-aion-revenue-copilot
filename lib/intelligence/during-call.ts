@@ -1,6 +1,11 @@
 import { getAiGatewayEnv } from "@/lib/ai/env";
 import { complete } from "@/lib/ai/gateway";
 import {
+  decideNextBestAction,
+  decideObjectionHandling,
+} from "@/lib/decisions/sales-decisions";
+import type { DecisionResult } from "@/lib/decisions/types";
+import {
   buildAgentSystemPrompt,
   discoveryChecklist,
   nextActionForStage,
@@ -21,6 +26,12 @@ export type DuringCallGuidance = {
   nextBestQuestion: string;
   nextBestAction: string;
   qualificationPrompt: string;
+  /** Discrete adapter score for next-best action (provider-switched). */
+  nextBestActionDecision?: DecisionResult;
+  /** Discrete adapter score for objection handling (provider-switched). */
+  objectionDecision?: DecisionResult;
+  /** Which decision connector produced discrete scores. */
+  decisionAdapterId?: DecisionResult["adapterId"];
 };
 
 const DEFAULT_OBJECTION_REFRAMES: Record<string, string> = {
@@ -110,18 +121,59 @@ export async function generateDuringCallGuidance(
 ): Promise<DuringCallGuidance> {
   const guidance = buildDuringCallGuidance(input);
 
-  if (!input.objection?.trim() || !getAiGatewayEnv().ok) {
-    return guidance;
-  }
+  const nextBestActionDecision = await decideNextBestAction({
+    lead: input.lead,
+    context: input.context,
+    objections: input.objection ? [input.objection] : undefined,
+    repNotes: input.repNotes,
+  });
 
-  try {
-    const objectionReframe = await generateObjectionReframeWithAi(input);
-    if (objectionReframe) {
-      return { ...guidance, objectionReframe };
+  const selectedAction = nextBestActionDecision.options.find(
+    (o) => o.id === nextBestActionDecision.selectedOptionId,
+  );
+
+  let objectionDecision: DecisionResult | undefined;
+  let objectionReframe = guidance.objectionReframe;
+
+  if (input.objection?.trim()) {
+    objectionDecision = await decideObjectionHandling({
+      lead: input.lead,
+      context: input.context,
+      objection: input.objection,
+      repNotes: input.repNotes,
+    });
+
+    const strategy = objectionDecision.options.find(
+      (o) => o.id === objectionDecision!.selectedOptionId,
+    );
+    const strategyLine = strategy
+      ? `Strategy (${objectionDecision.adapterId}): ${strategy.label}.`
+      : undefined;
+
+    if (getAiGatewayEnv().ok) {
+      try {
+        const aiReframe = await generateObjectionReframeWithAi(input);
+        if (aiReframe) {
+          objectionReframe = strategyLine ? `${strategyLine} ${aiReframe}` : aiReframe;
+        } else if (strategyLine) {
+          objectionReframe = `${strategyLine} ${objectionReframe ?? ""}`.trim();
+        }
+      } catch {
+        if (strategyLine) {
+          objectionReframe = `${strategyLine} ${objectionReframe ?? ""}`.trim();
+        }
+      }
+    } else if (strategyLine) {
+      objectionReframe = `${strategyLine} ${objectionReframe ?? ""}`.trim();
     }
-  } catch {
-    // Fall back to rule-based reframe from buildDuringCallGuidance.
   }
 
-  return guidance;
+  return {
+    ...guidance,
+    nextBestAction: selectedAction?.label ?? guidance.nextBestAction,
+    objectionReframe,
+    nextBestActionDecision,
+    objectionDecision,
+    decisionAdapterId: nextBestActionDecision.adapterId,
+  };
 }
