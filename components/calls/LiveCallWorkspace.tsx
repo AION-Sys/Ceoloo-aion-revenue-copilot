@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Plus } from "lucide-react";
+import { InterventionFeedback } from "@/components/cockpit/InterventionFeedback";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -292,6 +293,16 @@ export function LiveCallWorkspace({
               <p className="mt-1 text-sm font-medium leading-snug">
                 {guidance.nextBestAction}
               </p>
+              {guidance.interventions?.find((i) => i.kind === "next_best_action") ? (
+                <InterventionFeedback
+                  className="mt-2"
+                  compact
+                  interventionId={
+                    guidance.interventions.find((i) => i.kind === "next_best_action")!
+                      .interventionId
+                  }
+                />
+              ) : null}
               {guidance.copilotPolicy ? (
                 <div
                   className={cn(
@@ -350,9 +361,21 @@ export function LiveCallWorkspace({
             <div>
               <p className="text-xs font-semibold">Objection / reframe</p>
               {guidance.objectionReframe ? (
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {guidance.objectionReframe}
-                </p>
+                <>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {guidance.objectionReframe}
+                  </p>
+                  {guidance.interventions?.find((i) => i.kind === "objection_reframe") ? (
+                    <InterventionFeedback
+                      className="mt-2"
+                      compact
+                      interventionId={
+                        guidance.interventions.find((i) => i.kind === "objection_reframe")!
+                          .interventionId
+                      }
+                    />
+                  ) : null}
+                </>
               ) : (
                 <p className="mt-1 text-xs text-muted-foreground">
                   Capture an objection in notes, then refresh guidance from the call panel.

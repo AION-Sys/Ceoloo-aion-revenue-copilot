@@ -1,9 +1,17 @@
 import Link from "next/link";
+import { InterventionFeedback } from "@/components/cockpit/InterventionFeedback";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getRepSession } from "@/lib/auth/session";
 import { DEMO_LEARNING_SIGNALS, isDemoOrganization } from "@/lib/cockpit/demo";
+import {
+  applyInterventionFeedback,
+  createIntervention,
+  interventionToLearningSignal,
+  listInterventions,
+  upsertIntervention,
+} from "@/lib/learning/interventions";
 import {
   ensureDemoLearningMemory,
   getLearningMemoryAdapterId,
@@ -18,13 +26,43 @@ export default async function LearningPage() {
   if (!repSession) return null;
 
   const isDemo = isDemoOrganization(repSession.organizationId);
-  const signals = isDemo ? DEMO_LEARNING_SIGNALS : [];
   const adapterId = getLearningMemoryAdapterId();
   const bankId = organizationLearningBankId(repSession.organizationId);
 
   if (isDemo) {
     await ensureDemoLearningMemory(repSession.organizationId);
+    // Seed demo intervention into the store so usefulness capture can resolve ids.
+    for (const signal of DEMO_LEARNING_SIGNALS) {
+      if (!signal.interventionId) continue;
+      const seeded = createIntervention({
+        interventionId: signal.interventionId,
+        kind: "objection_reframe",
+        recommendation: signal.intervention,
+        pattern: signal.pattern,
+        organizationId: repSession.organizationId,
+        stageBefore: signal.stageFrom,
+        occurredAt: signal.occurredAt,
+      });
+      upsertIntervention(
+        applyInterventionFeedback(seeded, {
+          useful: signal.useful,
+          repUsed: signal.repUsed ?? null,
+          stageAfter: signal.stageTo,
+          eventualOutcome: signal.outcome,
+        }),
+      );
+    }
   }
+
+  const stored = listInterventions({ organizationId: repSession.organizationId });
+  const signals = [
+    ...stored.map((record) => interventionToLearningSignal(record)),
+    ...(isDemo ? DEMO_LEARNING_SIGNALS : []),
+  ].filter(
+    (signal, index, all) =>
+      all.findIndex((item) => (item.interventionId ?? item.id) === (signal.interventionId ?? signal.id)) ===
+      index,
+  );
 
   const reflection = await reflectSalesLearning(
     {
@@ -44,8 +82,8 @@ export default async function LearningPage() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Learning</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Self-learning loop — retain outcomes, tests, mistakes, and practices; recall and
-            reflect before the next move.
+            Measurable interventions — stable ids, usefulness capture, stage lineage. No
+            fabricated ROI.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -132,23 +170,47 @@ export default async function LearningPage() {
                       : "Unreviewed"}
                 </Badge>
               </CardHeader>
-              <CardContent className="grid gap-3 text-sm sm:grid-cols-3">
-                <div>
-                  <p className="text-xs text-muted-foreground">Intervention</p>
-                  <p>{signal.intervention}</p>
+              <CardContent className="space-y-3 text-sm">
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Intervention</p>
+                    <p>{signal.intervention}</p>
+                    {signal.interventionId ? (
+                      <p className="mt-1 font-mono text-[10px] text-muted-foreground">
+                        {signal.interventionId}
+                      </p>
+                    ) : null}
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Outcome</p>
+                    <p>{signal.outcome}</p>
+                    {signal.pattern ? (
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Pattern: {signal.pattern}
+                      </p>
+                    ) : null}
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Stage movement</p>
+                    <p>
+                      {signal.stageFrom ? funnelStageLabel(signal.stageFrom) : "—"}
+                      {" → "}
+                      {signal.stageTo ? funnelStageLabel(signal.stageTo) : "—"}
+                    </p>
+                    {signal.repUsed != null ? (
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Rep {signal.repUsed ? "used" : "skipped"}
+                      </p>
+                    ) : null}
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Outcome</p>
-                  <p>{signal.outcome}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Stage movement</p>
-                  <p>
-                    {signal.stageFrom ? funnelStageLabel(signal.stageFrom) : "—"}
-                    {" → "}
-                    {signal.stageTo ? funnelStageLabel(signal.stageTo) : "—"}
-                  </p>
-                </div>
+                {signal.interventionId ? (
+                  <InterventionFeedback
+                    interventionId={signal.interventionId}
+                    initialUseful={signal.useful}
+                    initialRepUsed={signal.repUsed ?? null}
+                  />
+                ) : null}
               </CardContent>
             </Card>
           ))}

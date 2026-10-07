@@ -1,7 +1,9 @@
+import type { InterventionRecord } from "@/lib/learning/interventions";
 import type { LearningMemoryOptions } from "@/lib/learning/memory/adapter";
 import {
   episodeFromCallOutcome,
   episodeFromDecision,
+  episodeFromIntervention,
   episodeFromLearningEvent,
   episodeFromMistake,
   episodeFromPractice,
@@ -30,13 +32,35 @@ function resolveBankId(options?: LearningMemoryOptions & { organizationId?: stri
 
 /** Retain a structured call outcome into the learning loop. */
 export async function retainCallOutcomeLearning(
-  input: { lead: Lead; outcome: CallOutcome; intervention?: string },
+  input: {
+    lead: Lead;
+    outcome: CallOutcome;
+    intervention?: string;
+    interventionId?: string;
+  },
   options?: LearningMemoryOptions,
 ): Promise<RetainMemoryResult> {
   return retainMemory(
     {
       bankId: resolveBankId({ ...options, organizationId: input.lead.organizationId }),
       episode: episodeFromCallOutcome(input),
+    },
+    options,
+  );
+}
+
+/** Retain a measurable intervention (id + lineage) into the learning loop. */
+export async function retainInterventionLearning(
+  record: InterventionRecord,
+  options?: LearningMemoryOptions & { organizationId?: string },
+): Promise<RetainMemoryResult> {
+  return retainMemory(
+    {
+      bankId: resolveBankId({
+        ...options,
+        organizationId: options?.organizationId ?? record.organizationId,
+      }),
+      episode: episodeFromIntervention(record),
     },
     options,
   );
@@ -136,7 +160,7 @@ export async function recallGuidanceLessons(
     {
       bankId: resolveBankId({ ...options, organizationId: input.organizationId }),
       query: parts.filter(Boolean).join(" "),
-      kinds: ["practice", "mistake", "call_outcome", "decision"],
+      kinds: ["practice", "mistake", "call_outcome", "decision", "intervention"],
       limit: 5,
     },
     options,

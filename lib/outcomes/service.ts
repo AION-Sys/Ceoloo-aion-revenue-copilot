@@ -1,13 +1,20 @@
 import { getCallWithLead } from "@/lib/calls/repository";
 import { persistCallOutcome } from "@/lib/crm/persistence";
+import { qualificationToLeadStatus } from "@/lib/crm/status";
 import {
   ingestLearningEvent,
   outcomeToLearningEvent,
 } from "@/lib/learning/events";
+import {
+  applyInterventionFeedback,
+  listInterventions,
+  upsertIntervention,
+} from "@/lib/learning/interventions";
+import { retainInterventionLearning } from "@/lib/learning/memory/loop";
 import { getOutcomeByCallId, saveCallOutcome } from "@/lib/outcomes/repository";
 import type { PostCallOutcomeInput } from "@/lib/outcomes/validation";
 import { mapCallOutcomeRow } from "@/lib/outcomes/mappers";
-import type { CallOutcome } from "@/lib/sales/types";
+import type { CallOutcome, FunnelStage } from "@/lib/sales/types";
 import type { Lead } from "@/lib/sales/types";
 
 export type SubmitCallOutcomeResult =
@@ -72,6 +79,24 @@ export async function submitCallOutcome(
     await ingestLearningEvent(outcomeToLearningEvent(outcome), {
       organizationId: callWithLead.lead.organizationId,
     });
+  } catch {
+    // ignore — sales path stays available
+  }
+
+  // Close intervention lineage for this call: stage_after + eventual_outcome.
+  try {
+    const stageAfter = qualificationToLeadStatus(outcome.qualification) as FunnelStage;
+    const open = listInterventions({ callId });
+    for (const record of open) {
+      const closed = applyInterventionFeedback(record, {
+        stageAfter,
+        eventualOutcome: outcome.nextAction,
+      });
+      upsertIntervention(closed);
+      await retainInterventionLearning(closed, {
+        organizationId: callWithLead.lead.organizationId,
+      });
+    }
   } catch {
     // ignore — sales path stays available
   }

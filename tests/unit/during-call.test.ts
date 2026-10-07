@@ -3,6 +3,7 @@ import {
   buildDuringCallGuidance,
   generateDuringCallGuidance,
 } from "@/lib/intelligence/during-call";
+import { clearInterventionStore } from "@/lib/learning/interventions";
 import {
   clearAllLocalBanks,
   organizationLearningBankId,
@@ -16,6 +17,7 @@ const originalEnv = { ...process.env };
 afterEach(() => {
   process.env = { ...originalEnv };
   clearAllLocalBanks();
+  clearInterventionStore();
 });
 
 const lead: Lead = {
@@ -118,5 +120,30 @@ describe("generateDuringCallGuidance + learning memory", () => {
     expect(guidance.learningLessons?.hits.length).toBeGreaterThan(0);
     expect(guidance.objectionReframe).toMatch(/Learned \(local\//);
     expect(guidance.decisionAdapterId).toBe("heuristic");
+  });
+
+  it("mints stable intervention ids when callId is provided", async () => {
+    process.env.AION_LEARNING_MEMORY_ADAPTER = "local";
+    process.env.AION_DECISION_ADAPTER = "heuristic";
+    delete process.env.AION_AI_GATEWAY_URL;
+    delete process.env.AION_AI_GATEWAY_API_KEY;
+
+    const guidance = await generateDuringCallGuidance({
+      lead,
+      context,
+      callId: "call-ivn-1",
+      objection: "We already have tools",
+    });
+
+    expect(guidance.interventions?.length).toBeGreaterThanOrEqual(2);
+    expect(
+      guidance.interventions?.every((item) => item.interventionId.startsWith("ivn-")),
+    ).toBe(true);
+    expect(
+      guidance.interventions?.some((item) => item.kind === "next_best_action"),
+    ).toBe(true);
+    expect(
+      guidance.interventions?.some((item) => item.kind === "objection_reframe"),
+    ).toBe(true);
   });
 });

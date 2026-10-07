@@ -42,6 +42,7 @@ export default async function CallGuidancePage({ params }: CallGuidancePageProps
   const initialGuidance = await generateDuringCallGuidance({
     lead: callWithLead.lead,
     context,
+    callId: callWithLead.call.id,
   });
 
   return (

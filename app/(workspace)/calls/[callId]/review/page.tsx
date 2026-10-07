@@ -54,6 +54,7 @@ export default async function CallReviewPage({ params }: ReviewPageProps) {
   const guidance = await generateDuringCallGuidance({
     lead: callWithLead.lead,
     context,
+    callId: callWithLead.call.id,
   });
 
   const existingRow = supabaseReady ? await getOutcomeByCallId(callId) : null;

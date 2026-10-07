@@ -105,7 +105,7 @@ Post-call outcomes retain into the loop; during-call guidance recalls lessons; `
 | AI client | `lib/ai/` | AION AI Gateway HTTP client |
 | Decisions | `lib/decisions/` | Provider-agnostic discrete scoring (state+question+options → scores); SemIf/gateway/heuristic connectors |
 | CRM | `lib/crm/` | Persist lead/call state, emit CRM events; approval-gated external writes |
-| Learning | `lib/learning/` | Learning events + self-learning memory (`lib/learning/memory`) |
+| Learning | `lib/learning/` | Learning events + self-learning memory (`lib/learning/memory`) + **stable intervention identity** (`lib/learning/interventions.ts`) |
 
 ## Canonical data (target)
 `revenue_leads`, `contacts`, `deals`, `activities`, `discovery_calls`, `proposals`, `outcomes`, `events`

@@ -5,7 +5,15 @@ import {
   decideObjectionHandling,
 } from "@/lib/decisions/sales-decisions";
 import type { DecisionResult } from "@/lib/decisions/types";
-import { recallGuidanceLessons } from "@/lib/learning/memory/loop";
+import {
+  interventionsFromGuidance,
+  type InterventionRecord,
+  upsertIntervention,
+} from "@/lib/learning/interventions";
+import {
+  recallGuidanceLessons,
+  retainInterventionLearning,
+} from "@/lib/learning/memory/loop";
 import type { RecallMemoryResult } from "@/lib/learning/memory/types";
 import {
   buildAgentSystemPrompt,
@@ -17,7 +25,7 @@ import {
   type CopilotPolicy,
   type QualificationEngineState,
 } from "@/lib/sales/qualification-engine";
-import type { BusinessContext, Lead, QualificationProfile } from "@/lib/sales/types";
+import type { BusinessContext, FunnelStage, Lead, QualificationProfile } from "@/lib/sales/types";
 
 export type DuringCallGuidanceInput = {
   lead: Lead;
@@ -26,6 +34,8 @@ export type DuringCallGuidanceInput = {
   objection?: string;
   profile?: QualificationProfile | null;
   nextAction?: string;
+  /** When set, recommendations mint stable intervention ids for learning. */
+  callId?: string;
 };
 
 export type DuringCallGuidance = {
@@ -46,6 +56,8 @@ export type DuringCallGuidance = {
   /** Structured qualification state + Copilot policy. */
   qualificationState?: QualificationEngineState;
   copilotPolicy?: CopilotPolicy;
+  /** Stable interventions minted from this guidance turn. */
+  interventions?: InterventionRecord[];
 };
 
 const DEFAULT_OBJECTION_REFRAMES: Record<string, string> = {
@@ -215,7 +227,7 @@ export async function generateDuringCallGuidance(
       ? guidance.nextBestAction
       : (selectedAction?.label ?? guidance.nextBestAction);
 
-  return {
+  const merged: DuringCallGuidance = {
     ...guidance,
     nextBestAction,
     objectionReframe,
@@ -224,4 +236,32 @@ export async function generateDuringCallGuidance(
     decisionAdapterId: nextBestActionDecision.adapterId,
     learningLessons,
   };
+
+  if (input.callId?.trim()) {
+    const interventions = interventionsFromGuidance({
+      callId: input.callId,
+      leadId: input.lead.id,
+      organizationId: input.lead.organizationId,
+      stageBefore: (input.lead.status ?? "lead") as FunnelStage,
+      nextBestAction: merged.nextBestAction,
+      nextBestQuestion: merged.nextBestQuestion,
+      objection: input.objection,
+      objectionReframe: merged.objectionReframe,
+    });
+
+    for (const record of interventions) {
+      upsertIntervention(record);
+      try {
+        await retainInterventionLearning(record, {
+          organizationId: input.lead.organizationId,
+        });
+      } catch {
+        // Guidance must stay available if memory retain fails.
+      }
+    }
+
+    merged.interventions = interventions;
+  }
+
+  return merged;
 }

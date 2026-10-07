@@ -13,7 +13,7 @@ Product direction captured from cockpit review (2026-10-07). **Freeze major UI e
 | Post-call extraction | **Manual form** — not reliable AI extraction yet |
 | Governed CRM persistence | **Partial** — lead status + event_log; GHL Adapter approval path still narrow |
 | Follow-up approval | **Done for drafts** — draft ≠ sent enforced in UI |
-| Outcome / intervention tracking | **Foundation** — learning memory + signals; no stable intervention IDs → eventual revenue yet |
+| Outcome / intervention tracking | **Partial** — stable `intervention_id` + usefulness capture + stage lineage; revenue attribution still open |
 | Live transcription / dynamic detection | **Not started** (P1) |
 | Economic-impact calculator | **Not started** (P1) |
 
@@ -77,9 +77,11 @@ Rendered on `/calls/[callId]/review` via `PostCallReviewSummary`. CRM proposals 
 
 ### Measurable Learning
 
-Every intervention gets a stable id and lineage fields:
+Every intervention gets a stable id and lineage fields (`lib/learning/interventions.ts`):
 
 `intervention_id` → objection/pattern → recommendation → `rep_used` → prospect_response → stage_before/after → eventual_outcome → revenue
+
+Minted when live guidance is shown (`callId` on `generateDuringCallGuidance`), retained as `intervention` episodes, usefulness captured on Live + Learning via `InterventionFeedback`, and closed with stage/outcome on post-call submit. Revenue stays unset until real attribution — never invent ROI.
 
 Accumulated outcome data is the moat — UI can be copied; intervention→outcome tables cannot.
 

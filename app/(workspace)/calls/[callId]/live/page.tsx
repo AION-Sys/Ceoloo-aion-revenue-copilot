@@ -67,6 +67,7 @@ export default async function LiveCallPage({ params }: LiveCallPageProps) {
     context,
     profile,
     nextAction,
+    callId: callWithLead.call.id,
   });
 
   return (

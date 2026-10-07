@@ -87,6 +87,8 @@ export const DEMO_FOLLOW_UPS: FollowUpDraft[] = [
 export const DEMO_LEARNING_SIGNALS: LearningSignal[] = [
   {
     id: "demo-learn-1",
+    interventionId:
+      "ivn-objection_reframe-demo-call-1-reframe-tools-objection-implementation-partner",
     title: "Acme HVAC · exploring",
     detail: "Objection reframe on 'already have tools' kept the conversation in audit mode",
     intervention: "Reframe tools objection → implementation partner",
@@ -94,6 +96,8 @@ export const DEMO_LEARNING_SIGNALS: LearningSignal[] = [
     stageFrom: "lead",
     stageTo: "business_audit",
     useful: true,
+    repUsed: true,
+    pattern: "We already have tools",
     occurredAt: "2026-10-06T14:30:00.000Z",
   },
 ];
