@@ -22,7 +22,7 @@ describe("post-call CRM mapping (Task 7)", () => {
     const event = outcomeToCrmEvent(outcome);
     expect(event.eventType).toBe("call_completed");
     expect(event.leadId).toBe("lead-1");
-    expect(qualificationToLeadStatus(outcome.qualification)).toBe("contacted");
+    expect(qualificationToLeadStatus(outcome.qualification)).toBe("business_audit");
   });
 
   it("emits CRM payload contract v1 fields", () => {

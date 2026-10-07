@@ -60,17 +60,18 @@ export function outcomeToCrmEvent(outcome: CallOutcome): CrmEvent {
 }
 
 /**
- * Maps post-call qualification onto CRM lead status (docs/DATA_MODEL.md leads.status).
+ * Maps post-call qualification onto CRM lead status (AION FunnelStage).
+ * Aligns with legacy status normalization in lib/sales/motion.ts.
  */
 export function qualificationToLeadStatus(qualification: QualificationState): LeadStatus {
   switch (qualification) {
     case "qualified":
-      return "qualified";
+      return "qualified_opportunity";
     case "disqualified":
-      return "closed";
+      return "closed_won";
     case "exploring":
     case "unqualified":
-      return "contacted";
+      return "business_audit";
   }
 }
 

@@ -95,10 +95,10 @@ describe("CRM event mapping", () => {
 
   it("maps qualification to lead status", async () => {
     const { qualificationToLeadStatus } = await import("@/lib/crm/persistence");
-    expect(qualificationToLeadStatus("unqualified")).toBe("contacted");
-    expect(qualificationToLeadStatus("exploring")).toBe("contacted");
-    expect(qualificationToLeadStatus("qualified")).toBe("qualified");
-    expect(qualificationToLeadStatus("disqualified")).toBe("closed");
+    expect(qualificationToLeadStatus("unqualified")).toBe("business_audit");
+    expect(qualificationToLeadStatus("exploring")).toBe("business_audit");
+    expect(qualificationToLeadStatus("qualified")).toBe("qualified_opportunity");
+    expect(qualificationToLeadStatus("disqualified")).toBe("closed_won");
   });
 });
 
@@ -138,7 +138,7 @@ describe("persistCallOutcome", () => {
     const result = await persistCallOutcome(outcome, { callId: "call-1" });
 
     expect(result).toEqual({ ok: true, recordId: "crm-event-1" });
-    expect(mock.tables.leads.update).toHaveBeenCalledWith({ status: "contacted" });
+    expect(mock.tables.leads.update).toHaveBeenCalledWith({ status: "business_audit" });
     expect(mock.tables.event_log.insert).toHaveBeenCalledWith({
       call_id: "call-1",
       lead_id: "lead-1",
