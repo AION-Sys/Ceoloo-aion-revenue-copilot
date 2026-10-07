@@ -59,6 +59,7 @@ Business context (`existing_systems`, `workflow_problems`, `recommended_service`
 | V1 scope | Assisted workspace, no autonomous calling | Validate workflow before automation |
 | Sales motion | AION implementation funnel | Qualify workflow and implementation fit |
 | Evidence | Production vs synthetic separation | Demo activity must not mutate real client records |
+| UI expansion | **Frozen** at 7 Product Lab screens | Validate intelligence + real calls; see `docs/plans/mvp-intelligence-finish-line.md` |
 
 ## Decision adapters (model / tool agnostic)
 
@@ -173,7 +174,8 @@ Tasks 11–12 are **validation**, not feature expansion.
 | Learning contract drift | Medium | Version events in payload |
 | Scope creep into CRM platform | High | Mission out-of-scope enforced; Product Lab freeze on features |
 | Synthetic contamination of real CRM | High | Explicit demo/prod separation; approval + external confirm |
-| Validation delayed by more build work | High | Gate A is the next product gate |
+| Validation delayed by more build work | High | Gate A is the next product gate; UI freeze + P0 intelligence plan |
+| Feature creep past frozen screens | High | Finish-line plan; no Mission 003 / autonomous calling |
 
 ## Approval
 - [x] Architect scaffold complete

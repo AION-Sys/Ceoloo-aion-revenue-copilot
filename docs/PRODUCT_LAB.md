@@ -10,7 +10,8 @@
 | Primary user | AION sales rep / owner-operator (first) |
 | Later buyer | SMB sales teams, contractors, home-service businesses, revenue leaders with inconsistent follow-up |
 | Next product gate | Real-call evidence before broader commercialization |
-| Feature posture | Prove the loop — do not expand scope |
+| Feature posture | **UI frozen** — make intelligence real; do not expand screens |
+| Finish-line plan | [`plans/mvp-intelligence-finish-line.md`](./plans/mvp-intelligence-finish-line.md) |
 
 ## Product promise
 Revenue Copilot gives a sales rep the right context before a conversation, intelligent guidance during it, and a governed next action afterward — while continuously learning what actually moves opportunities forward.
@@ -46,6 +47,21 @@ Primary nav is the command cockpit only — not a light CRM shell.
 
 UI plan: [`docs/plans/mvp-command-center-cockpit.md`](./plans/mvp-command-center-cockpit.md).
 
+**UI freeze (2026-10-07):** The seven screens already express the Product Lab loop. Do not add major dashboards, autonomous SDR, or CRM-clone surfaces. Next work makes the intelligence behind these screens stateful, measurable, and production-connected — see finish-line plan.
+
+## Redefined MVP acceptance test
+
+One AION rep can take a **real** prospect from Lead → Call Prep → Discovery → Diagnosis → Qualified Opportunity → Follow-Up using Revenue Copilot, while the system captures evidence, recommends actions, persists **approved** CRM changes, and records whether its recommendations helped move the opportunity forward.
+
+## Development priority (after UI scaffold)
+
+| Priority | Focus |
+|----------|--------|
+| **P0** | Real prospect + production CRM path · structured qualification engine · reliable post-call extraction · governed CRM persistence · follow-up approval · outcome/intervention tracking |
+| **P1** | Live transcription · dynamic objection/buying-signal detection · economic-impact calculator · smarter next-best-action |
+| **P2** | Proposal generation · scheduling · email/SMS execution · pipeline analytics · coaching · multi-user |
+| **Deferred** | Autonomous outbound · AI calling · broad integrations · agent builder · autonomous closing |
+
 ## Canonical data
 Operate on AION’s revenue model — not a disconnected CRM:
 
@@ -54,6 +70,8 @@ Operate on AION’s revenue model — not a disconnected CRM:
 Every meaningful recommendation should eventually be traceable:
 
 **conversation → evidence → recommendation → rep decision → CRM action → outcome**
+
+Interventions should eventually carry stable ids so Learning can measure: recommendation → rep used → prospect response → stage delta → revenue.
 
 ## Architecture (intended)
 
@@ -86,11 +104,11 @@ Also emit AION execution/learning events so Agent OS can track cost, interventio
 Those are downstream. Mission 003 stays blocked until Mission 002 validation gates pass.
 
 ## Validation posture
-Intelligence + UI foundation is ahead of real-world proof. The Product Lab priority is **real AION sales activity**, not more features.
+The **screens** are good enough to validate. The Product Lab priority is **real AION sales activity** plus P0 intelligence (qualification engine, review object, intervention outcomes) — not more UI.
 
 | Gate | Target | Doc |
 |------|--------|-----|
-| Internal pilot (immediate) | 5 eligible real call sessions | [`VALIDATION.md`](./VALIDATION.md) |
+| Internal pilot (immediate) | 5 eligible real call sessions against the redefined acceptance test | [`VALIDATION.md`](./VALIDATION.md) |
 | Commercial validation | ~25 real conversations + accuracy / usefulness / stage / conversion / lineage criteria | [`VALIDATION.md`](./VALIDATION.md) |
 
 ## Related product docs

@@ -20,6 +20,7 @@ Home-service contractors and SMB sales teams generate leads, but revenue leaks b
 - Emit structured events for CRM persistence and AION learning infrastructure
 - Validate on real prospect conversations via AION's contractor / Revenue OS outbound pipeline
 - Keep every meaningful recommendation eventually traceable: conversation → evidence → recommendation → rep decision → CRM action → outcome
+- **Finish line (UI frozen):** make the existing seven screens intelligence-complete — structured qualification state, economic impact, canonical post-call review, governed CRM approvals, measurable interventions — before adding surfaces (see [`plans/mvp-intelligence-finish-line.md`](./plans/mvp-intelligence-finish-line.md))
 
 ## Non-Goals (V1)
 - Autonomous calling / autonomous SDR
@@ -62,10 +63,11 @@ Screen intent is defined in [`PRODUCT_LAB.md`](./PRODUCT_LAB.md). Keep the UI ti
 ### Must Have
 - Pre-call brief from lead + business context (objective, questions, missing info, likely objections)
 - Qualification and agent guidance follow the AION implementation funnel above
+- Structured qualification engine (boolean discovery state + Copilot policy — not only a % bar)
 - During-call guidance surfaces (checklist, objections, suggested responses, next-best action)
-- Post-call structured outcome capture
+- Post-call structured outcome capture → canonical review object (evidence, stage rec, CRM mutation bundle)
 - Reviewable / approvable CRM changes (not blind writes)
-- Learning event emission on outcomes
+- Learning event emission on outcomes with stable intervention identity when recommendations are shown
 - Clear separation of synthetic/demo evidence from production client records
 - CI: lint, typecheck, tests, build
 
@@ -74,12 +76,15 @@ Screen intent is defined in [`PRODUCT_LAB.md`](./PRODUCT_LAB.md). Keep the UI ti
 - Objection pattern tagging for learning worker
 - Follow-up draft + task/date recommendations with explicit draft vs sent state
 - Lineage fields tying recommendation → decision → CRM action → outcome
+- Economic-impact quantification on pain (leads × delay × AOV × close rate)
+- Today recommendation explains *why* a prospect is priority (data-backed)
 
 ### Won't Have (V1)
-- Autonomous dialer
-- Custom workflow designer
+- Autonomous dialer / AI calling
+- Custom workflow designer / generalized agent builder
 - Enterprise multi-tenant admin for external customers
 - Broad GHL surface beyond Contact → Opportunity → Note/Task (pilot)
+- Major new cockpit screens beyond the Product Lab seven
 
 ## Production guardrails
 - Synthetic/demo activity cannot mutate a real client record
