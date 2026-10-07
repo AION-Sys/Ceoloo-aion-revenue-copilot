@@ -6,6 +6,10 @@ DRAFT — implement in Supabase migration (Task 1)
 ## Overview
 Relational model in Postgres (Supabase) for leads, business context, calls, outcomes, and event audit trail.
 
+Product Lab target canonical set (evolve toward; do not invent a parallel CRM): `revenue_leads`, `contacts`, `deals`, `activities`, `discovery_calls`, `proposals`, `outcomes`, `events`. See [`PRODUCT_LAB.md`](./PRODUCT_LAB.md).
+
+**Guardrail:** synthetic/demo rows must be distinguishable from production client records and must never drive confirmed GHL mutations.
+
 ## Entities
 
 ### `business_contexts`

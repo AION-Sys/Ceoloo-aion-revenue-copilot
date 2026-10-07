@@ -1,19 +1,23 @@
 # Architecture — AION Revenue Conversion Copilot
 
 ## Status
-APPROVED — MVP scaffold
+APPROVED — MVP scaffold · Product Lab: **MVP → Validation**
 
 ## Mission Link
-[aion-software-factory: MISSION-002](https://github.com/Ceoloo/aion-software-factory/blob/main/missions/MISSION-002.md)
+[aion-software-factory: MISSION-002](https://github.com/AION-Sys/aion-software-factory/blob/main/missions/MISSION-002.md)
+
+Product Lab classification: [`PRODUCT_LAB.md`](./PRODUCT_LAB.md)
 
 ## Summary
-Next.js sales workspace with Supabase for persistence, AION AI Gateway for conversational intelligence, and AION event infrastructure for CRM + learning signals. V1 is a tight rep workflow — not a platform.
+Next.js sales workspace with Supabase for persistence, AION Runtime / AI Gateway for conversational intelligence, governed GHL Adapter writes for CRM actions, and AION event infrastructure for CRM + learning signals. V1 is a tight rep workflow — not a platform.
+
+**Priority now:** prove the loop with real sales activity (`docs/VALIDATION.md`). Do not invent Mission 003 product work or expand out-of-scope surfaces.
 
 ## Sales motion
 
 The copilot reasons with AION's implementation funnel:
 
-Lead → Business Audit → Problem/Workflow Diagnosis → Qualified Opportunity → Solution/Implementation Scope → Proposal → Closed Won → Onboarding.
+Lead → Business Audit → Diagnosis → Qualified Opportunity → Scope → Proposal → Closed Won → Onboarding.
 
 Qualification dimensions live in `lib/sales/motion.ts` and are the agent instructions, the pre-call questions, the during-call checklist, and the `qualification_profile` stored on call outcomes: current workflow/problem, business impact, existing systems/tools, automation opportunity, decision maker, implementation readiness, urgency/timeline, budget/commercial fit, and recommended AION service.
 
@@ -24,46 +28,56 @@ Business context (`existing_systems`, `workflow_problems`, `recommended_service`
 ```
 ┌─────────────┐     ┌──────────────────┐     ┌─────────────────┐
 │  Sales Rep  │────▶│  Next.js App     │────▶│  Supabase       │
-│  (browser)  │     │  (this repo)     │     │  Postgres       │
+│  (browser)  │     │  (this repo)     │     │  canonical data │
 └─────────────┘     └────────┬─────────┘     └─────────────────┘
                              │
-              ┌──────────────┼──────────────┐
-              ▼              ▼              ▼
-      ┌──────────────┐ ┌───────────┐ ┌──────────────────┐
-      │ AION AI      │ │ CRM events│ │ Learning events  │
-      │ Gateway      │ │ (lib/crm) │ │ (lib/learning)   │
-      └──────────────┘ └───────────┘ └──────────────────┘
-                                              │
-                                              ▼
-                                    ┌──────────────────┐
-                                    │ AION Learning    │
-                                    │ Worker           │
-                                    └──────────────────┘
+              ┌──────────────┼──────────────────┐
+              ▼              ▼                  ▼
+      ┌──────────────┐ ┌───────────┐   ┌──────────────────┐
+      │ AION Runtime │ │ CRM path  │   │ Learning events  │
+      │ / AI Gateway │ │ (approve) │   │ (lib/learning)   │
+      └──────┬───────┘ └─────┬─────┘   └────────┬─────────┘
+             ▼               ▼                  ▼
+      ┌──────────────┐ ┌───────────┐   ┌──────────────────┐
+      │ OpenRouter / │ │ GHL       │   │ AION Learning /  │
+      │ model providers│ │ Adapter │   │ Agent OS events  │
+      └──────────────┘ └───────────┘   └──────────────────┘
 ```
 
 ## Key Decisions
 
 | Decision | Choice | Rationale |
 |----------|--------|-----------|
-| App framework | Next.js 15 + TypeScript | AION standard stack; fast iteration |
-| Data store | Supabase / Postgres | Standard stack; relational lead/call state |
-| AI | AION AI Gateway | Centralized model routing, billing, policy |
-| Events | HTTP ingest to AION events infra | Decouple product from learning pipeline |
+| App framework | Next.js 15 + TypeScript + shadcn/ui | AION standard stack; fast iteration |
+| Data store | Supabase / Postgres (canonical revenue model) | Relational lead/call state; not a second CRM |
+| AI | AION Runtime / AI Gateway → OpenRouter / providers | Centralized routing, billing, policy |
+| CRM writes | GHL Adapter, human-approved | Governed Contact → Opportunity → Note/Task only for pilot |
+| Events | HTTP ingest to AION events infra | Decouple product from learning pipeline; Agent OS cost/ROI later |
 | Deployment | Vercel | Standard for Next.js; CEO gate on prod |
 | V1 scope | Assisted workspace, no autonomous calling | Validate workflow before automation |
 | Sales motion | AION implementation funnel | Qualify workflow and implementation fit |
+| Evidence | Production vs synthetic separation | Demo activity must not mutate real client records |
 
 ## Components
 
 | Component | Path | Responsibility |
 |-----------|------|----------------|
-| App shell | `app/` | Routes, layout, rep UI |
+| App shell | `app/` | Routes, layout, MVP screens |
 | UI components | `components/` | Workflow phases, call panels |
 | Sales domain | `lib/sales/` | Funnel, qualification dimensions, agent instructions, lead and outcome types |
 | Intelligence | `lib/intelligence/` | Pre-call brief, objection detection (AI) |
 | AI client | `lib/ai/` | AION AI Gateway HTTP client |
-| CRM | `lib/crm/` | Persist lead/call state, emit CRM events |
+| CRM | `lib/crm/` | Persist lead/call state, emit CRM events; approval-gated external writes |
 | Learning | `lib/learning/` | Map outcomes → learning events, ingest |
+
+## Canonical data (target)
+`revenue_leads`, `contacts`, `deals`, `activities`, `discovery_calls`, `proposals`, `outcomes`, `events`
+
+Lineage target for recommendations:
+
+**conversation → evidence → recommendation → rep decision → CRM action → outcome**
+
+See [`DATA_MODEL.md`](./DATA_MODEL.md) for current table contracts; evolve toward the canonical set without inventing a parallel CRM.
 
 ## API / Server Actions (planned tasks)
 
@@ -73,12 +87,15 @@ Business context (`existing_systems`, `workflow_problems`, `recommended_service`
 | `POST /api/calls/[id]/guidance` | During-call suggestions |
 | `POST /api/calls/[id]/outcome` | Post-call structured outcome |
 | Internal | CRM persist + learning ingest |
+| Internal (pilot) | Approval-gated GHL Adapter write proposals |
 
 Builder tasks implement these as small PRs.
 
-## Security Considerations
+## Production guardrails
 - Auth required before any lead/call data (Supabase Auth — task)
-- API keys server-side only (`AION_*`, `SUPABASE_SERVICE_ROLE_KEY`)
+- API keys server-side only (`AION_*`, `SUPABASE_SERVICE_ROLE_KEY`, GHL credentials)
+- Synthetic/demo paths must be labeled and blocked from production CRM mutation
+- CRM write claims require external confirmation IDs; drafts stay drafts
 - Security review mandatory before production deploy
 - PII in transcripts — encrypt at rest, minimize retention (document in DATA_MODEL)
 
@@ -88,7 +105,7 @@ Builder tasks implement these as small PRs.
 | Unit | `tests/unit/` | lib/intelligence, lib/learning, lib/crm |
 | Critical path | `tests/critical-path/` | post-call → CRM + learning pipeline |
 | Integration | `tests/integration/` | Supabase, AI Gateway (when wired) |
-| Manual | `docs/VALIDATION.md` | Real prospect conversations |
+| Manual | `docs/VALIDATION.md` | Real prospect conversations (Gate A / Gate B) |
 
 ## Deployment
 - **Preview:** Vercel preview on PR
@@ -109,6 +126,10 @@ Builder tasks implement these as small PRs.
 | 8 | Learning event ingest (live) | Builder | 6 |
 | 9 | E2E critical path tests | Builder | 7, 8 |
 | 10 | Production deploy + release record | Release | 9, QA, Security |
+| 11 | Internal pilot evidence (Gate A) | QA / Operator | 10 |
+| 12 | Commercial validation evidence (Gate B) | QA / Operator | 11 |
+
+Tasks 11–12 are **validation**, not feature expansion.
 
 ## Risks
 
@@ -116,8 +137,11 @@ Builder tasks implement these as small PRs.
 |------|--------|------------|
 | AI latency during live calls | High | Cache context; async suggestions |
 | Learning contract drift | Medium | Version events in payload |
-| Scope creep into CRM platform | High | Mission out-of-scope enforced |
+| Scope creep into CRM platform | High | Mission out-of-scope enforced; Product Lab freeze on features |
+| Synthetic contamination of real CRM | High | Explicit demo/prod separation; approval + external confirm |
+| Validation delayed by more build work | High | Gate A is the next product gate |
 
 ## Approval
 - [x] Architect scaffold complete
+- [x] Product Lab: MVP → Validation (real-call evidence before commercialization)
 - [ ] Human approved for production architecture changes (before prod deploy)
