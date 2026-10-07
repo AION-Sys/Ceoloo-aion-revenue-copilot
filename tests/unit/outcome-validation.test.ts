@@ -60,6 +60,26 @@ describe("post-call outcome validation", () => {
     });
   });
 
+  it("parses economicImpact and computes monthly exposure", () => {
+    const input = parsePostCallOutcomeInput({
+      qualification: "qualified",
+      nextAction: "Revenue Systems Assessment",
+      qualificationProfile: {
+        currentWorkflow: "Phone chase",
+        economicImpact: {
+          leadsPerMonth: 40,
+          delayedShare: 0.25,
+          avgJobValue: 4000,
+          closeRate: 0.3,
+          source: "prospect_stated",
+        },
+      },
+    });
+
+    expect(input?.qualificationProfile?.economicImpact?.monthlyRevenueExposure).toBe(12000);
+    expect(input?.qualificationProfile?.economicImpact?.source).toBe("prospect_stated");
+  });
+
   it("rejects non-object bodies", () => {
     expect(parsePostCallOutcomeInput(null)).toBeNull();
     expect(parsePostCallOutcomeInput("invalid")).toBeNull();

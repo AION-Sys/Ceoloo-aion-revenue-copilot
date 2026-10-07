@@ -3,13 +3,20 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { EconomicImpactFields } from "@/components/cockpit/EconomicImpactFields";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { QUALIFICATION_OPTIONS } from "@/lib/intelligence/call-workspace";
+import {
+  applyEconomicImpactToProfile,
+  formatEconomicImpactSummary,
+  hasQuantifiedEconomicImpact,
+} from "@/lib/sales/economic-impact";
 import { QUALIFICATION_DIMENSIONS } from "@/lib/sales/motion";
 import type {
   CallOutcome,
+  EconomicImpact,
   ObjectionRecord,
   QualificationProfile,
   QualificationState,
@@ -81,8 +88,15 @@ export function PostCallOutcomeForm({
 
   const readOnly = Boolean(savedOutcome) || !canPersist;
 
-  function updateQualificationField(key: keyof QualificationProfile, value: string) {
+  function updateQualificationField(
+    key: Exclude<keyof QualificationProfile, "economicImpact">,
+    value: string,
+  ) {
     setQualificationProfile((current) => ({ ...current, [key]: value }));
+  }
+
+  function updateEconomicImpact(impact: EconomicImpact | undefined) {
+    setQualificationProfile((current) => applyEconomicImpactToProfile(current, impact));
   }
 
   function updatePainPoint(index: number, value: string) {
@@ -186,14 +200,22 @@ export function PostCallOutcomeForm({
             <ul className="list-disc space-y-1 pl-4">
               <li>Qualification: {savedOutcome.qualification}</li>
               {savedOutcome.qualificationProfile
-                ? QUALIFICATION_DIMENSIONS.filter(
-                    (dimension) => savedOutcome.qualificationProfile?.[dimension.profileKey],
-                  ).map((dimension) => (
+                ? QUALIFICATION_DIMENSIONS.filter((dimension) => {
+                    const value = savedOutcome.qualificationProfile?.[dimension.profileKey];
+                    return typeof value === "string" && value.trim().length > 0;
+                  }).map((dimension) => (
                     <li key={dimension.id}>
-                      {dimension.label}: {savedOutcome.qualificationProfile?.[dimension.profileKey]}
+                      {dimension.label}:{" "}
+                      {savedOutcome.qualificationProfile?.[dimension.profileKey] as string}
                     </li>
                   ))
                 : null}
+              {hasQuantifiedEconomicImpact(savedOutcome.qualificationProfile?.economicImpact) ? (
+                <li>
+                  Economic impact:{" "}
+                  {formatEconomicImpactSummary(savedOutcome.qualificationProfile!.economicImpact!)}
+                </li>
+              ) : null}
               <li>Next action: {savedOutcome.nextAction}</li>
               {savedOutcome.painPoints.length > 0 ? (
                 <li>Pain points: {savedOutcome.painPoints.join(", ")}</li>
@@ -265,7 +287,11 @@ export function PostCallOutcomeForm({
               <span className="text-xs text-muted-foreground">{dimension.label}</span>
               <Input
                 type="text"
-                value={qualificationProfile[dimension.profileKey] ?? ""}
+                value={
+                  typeof qualificationProfile[dimension.profileKey] === "string"
+                    ? (qualificationProfile[dimension.profileKey] as string)
+                    : ""
+                }
                 onChange={(event) =>
                   updateQualificationField(dimension.profileKey, event.target.value)
                 }
@@ -274,6 +300,19 @@ export function PostCallOutcomeForm({
               />
             </label>
           ))}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Economic impact</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <EconomicImpactFields
+            value={qualificationProfile.economicImpact}
+            onChange={updateEconomicImpact}
+            disabled={readOnly || isPending}
+          />
         </CardContent>
       </Card>
 

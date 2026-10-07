@@ -1,4 +1,8 @@
-import { QUALIFICATION_DIMENSIONS } from "@/lib/sales/motion";
+import { hasQuantifiedEconomicImpact } from "@/lib/sales/economic-impact";
+import {
+  QUALIFICATION_DIMENSIONS,
+  type QualificationProfileTextKey,
+} from "@/lib/sales/motion";
 import type { BusinessContext, Lead, QualificationProfile } from "@/lib/sales/types";
 
 /**
@@ -25,7 +29,7 @@ export type QualificationFlag = {
   label: string;
   confirmed: boolean;
   /** Profile key when derived from qualification_profile; null for evidence-only flags. */
-  profileKey: keyof QualificationProfile | null;
+  profileKey: QualificationProfileTextKey | null;
 };
 
 /** Pitch only when at least this many of 10 flags are confirmed. */
@@ -33,7 +37,7 @@ export const DISCOVERY_COMPLETE_THRESHOLD = 6;
 
 const PROFILE_FLAG_MAP: ReadonlyArray<{
   id: Exclude<QualificationFlagId, "next_step_committed">;
-  profileKey: keyof QualificationProfile;
+  profileKey: QualificationProfileTextKey;
   label: string;
 }> = [
   { id: "pain_confirmed", profileKey: "currentWorkflow", label: "Pain / workflow problem confirmed" },
@@ -94,7 +98,7 @@ export type CopilotPolicy = {
 
 function profileFilled(
   profile: QualificationProfile | undefined | null,
-  key: keyof QualificationProfile,
+  key: Exclude<keyof QualificationProfile, "economicImpact">,
 ): boolean {
   const value = profile?.[key];
   return typeof value === "string" && value.trim().length > 0;
@@ -112,12 +116,17 @@ export function deriveQualificationState(
   profile?: QualificationProfile | null,
   evidence?: QualificationEvidence,
 ): QualificationEngineState {
-  const flags: QualificationFlag[] = PROFILE_FLAG_MAP.map((row) => ({
-    id: row.id,
-    label: row.label,
-    profileKey: row.profileKey,
-    confirmed: profileFilled(profile, row.profileKey),
-  }));
+  const flags: QualificationFlag[] = PROFILE_FLAG_MAP.map((row) => {
+    const fromText = profileFilled(profile, row.profileKey);
+    const fromEconomic =
+      row.id === "impact_quantified" && hasQuantifiedEconomicImpact(profile?.economicImpact);
+    return {
+      id: row.id,
+      label: row.label,
+      profileKey: row.profileKey,
+      confirmed: fromText || fromEconomic,
+    };
+  });
 
   flags.push({
     id: "next_step_committed",

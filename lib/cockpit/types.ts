@@ -30,7 +30,7 @@ export type InteractionEvent = {
 export type QualificationGap = {
   id: string;
   label: string;
-  profileKey: keyof QualificationProfile;
+  profileKey: Exclude<keyof QualificationProfile, "economicImpact">;
 };
 
 export type QualificationCompleteness = {
@@ -38,7 +38,7 @@ export type QualificationCompleteness = {
   total: number;
   percent: number;
   gaps: QualificationGap[];
-  filledKeys: Array<keyof QualificationProfile>;
+  filledKeys: Array<Exclude<keyof QualificationProfile, "economicImpact">>;
 };
 
 export type LineageStepStatus = "pending" | "active" | "done" | "blocked";
@@ -131,6 +131,10 @@ export type CallPrepSurface = {
   policy?: import("@/lib/sales/qualification-engine").CopilotPolicy;
   engineConfirmed?: number;
   engineTotal?: number;
+  /** Structured exposure when quantified; otherwise discovery prompt. */
+  economicImpact?: import("@/lib/sales/types").EconomicImpact | null;
+  economicImpactSummary?: string;
+  economicImpactPrompt?: string;
 };
 
 export type ProspectWorkspaceModel = {

@@ -1,6 +1,7 @@
 import { startCallForLead } from "@/lib/leads/actions";
 import { buildCallPrepSurface } from "@/lib/cockpit/prep";
 import { scoreQualificationCompleteness } from "@/lib/cockpit/qualification";
+import { hasQuantifiedEconomicImpact } from "@/lib/sales/economic-impact";
 import { funnelStageLabel } from "@/lib/sales/motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -140,6 +141,32 @@ export function PreCallBriefPanel({ brief, profile }: PreCallBriefPanelProps) {
           </CardContent>
         </Card>
       </div>
+
+      <Card className="border-ai/15">
+        <CardHeader>
+          <CardTitle>Economic impact</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2 text-sm">
+          {hasQuantifiedEconomicImpact(prep.economicImpact) ? (
+            <>
+              <p className="font-medium leading-snug">{prep.economicImpactSummary}</p>
+              <p className="text-xs text-muted-foreground">
+                Use this exposure in diagnosis and proposal — do not invent additional ROI.
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-muted-foreground">
+                {prep.economicImpactPrompt ??
+                  "Size monthly revenue exposure before pitching: leads × delayed share × avg job × close rate."}
+              </p>
+              {prep.economicImpactSummary ? (
+                <p className="text-xs text-muted-foreground">{prep.economicImpactSummary}</p>
+              ) : null}
+            </>
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

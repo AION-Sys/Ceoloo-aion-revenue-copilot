@@ -75,6 +75,8 @@ describe("call prep surface", () => {
     expect(prep.likelyObjections.length).toBeGreaterThan(0);
     expect(prep.recommendedQuestions.length).toBeGreaterThan(0);
     expect(prep.recommendedQuestions[0]?.toLowerCase()).toMatch(/cost|impact/);
+    expect(prep.economicImpactPrompt?.toLowerCase()).toMatch(/leads\/month|revenue exposure/);
+    expect(prep.missingInformation.some((item) => /impact/i.test(item))).toBe(true);
   });
 });
 

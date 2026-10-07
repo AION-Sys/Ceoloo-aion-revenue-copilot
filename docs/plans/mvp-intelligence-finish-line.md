@@ -15,7 +15,7 @@ Product direction captured from cockpit review (2026-10-07). **Freeze major UI e
 | Follow-up approval | **Done for drafts** — draft ≠ sent enforced in UI |
 | Outcome / intervention tracking | **Partial** — stable `intervention_id` + usefulness capture + stage lineage; revenue attribution still open |
 | Live transcription / dynamic detection | **Not started** (P1) |
-| Economic-impact calculator | **Not started** (P1) |
+| Economic-impact calculator | **Partial** — structured fields + formula on outcome/prep; no fabricated ROI |
 
 ## Redefined MVP acceptance test
 
@@ -61,11 +61,11 @@ Copilot policy example: `confirmed < 6/10` → discovery incomplete → do not p
 
 ### Economic impact (feeds diagnosis / proposal)
 
-Prefer quantified exposure over vague pain:
+Prefer quantified exposure over vague pain (`lib/sales/economic-impact.ts`):
 
 `leads/month × delayed_share × avg_job_value × close_rate ≈ monthly_revenue_exposure`
 
-Flow into diagnosis, ROI argument, and Learning outcomes.
+Stored on `qualification_profile.economicImpact` (jsonb — no new table). Synced into `businessImpact` text when complete so `impact_quantified` confirms. Surfaces: Call Prep card, post-call `EconomicImpactFields`, review evidence. Never invent numbers when inputs are incomplete.
 
 ### Canonical post-call review object
 
