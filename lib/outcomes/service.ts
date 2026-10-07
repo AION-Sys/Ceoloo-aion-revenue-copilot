@@ -1,5 +1,9 @@
 import { getCallWithLead } from "@/lib/calls/repository";
 import { persistCallOutcome } from "@/lib/crm/persistence";
+import {
+  ingestLearningEvent,
+  outcomeToLearningEvent,
+} from "@/lib/learning/events";
 import { getOutcomeByCallId, saveCallOutcome } from "@/lib/outcomes/repository";
 import type { PostCallOutcomeInput } from "@/lib/outcomes/validation";
 import { mapCallOutcomeRow } from "@/lib/outcomes/mappers";
@@ -56,10 +60,20 @@ export async function submitCallOutcome(
     created = true;
   }
 
-  // Task 7 — CRM persist (lead status + event_log). Learning ingest remains Task 8.
+  // Task 7 — CRM persist (lead status + event_log).
   const crm = await persistCallOutcome(outcome, { callId });
   if (!crm.ok) {
     return { ok: false, reason: "save_failed" };
+  }
+
+  // Self-learning loop: retain outcome into local|Hindsight memory (Task 8 path).
+  // Never block CRM success on memory retain failures.
+  try {
+    await ingestLearningEvent(outcomeToLearningEvent(outcome), {
+      organizationId: callWithLead.lead.organizationId,
+    });
+  } catch {
+    // ignore — sales path stays available
   }
 
   return {

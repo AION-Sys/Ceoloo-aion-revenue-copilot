@@ -52,6 +52,7 @@ Business context (`existing_systems`, `workflow_problems`, `recommended_service`
 | Data store | Supabase / Postgres (canonical revenue model) | Relational lead/call state; not a second CRM |
 | AI | AION Runtime / AI Gateway → OpenRouter / providers | Centralized routing, billing, policy |
 | Discrete decisions | Switchable adapters (`heuristic` \| `gateway` \| `semif`) | Models/tools stay agnostic; product calls `decide()` only |
+| Self-learning memory | Switchable adapters (`local` \| `hindsight`) | Retain/recall/reflect from outcomes, tests, sessions, mistakes, practices |
 | CRM writes | GHL Adapter, human-approved | Governed Contact → Opportunity → Note/Task only for pilot |
 | Events | HTTP ingest to AION events infra | Decouple product from learning pipeline; Agent OS cost/ROI later |
 | Deployment | Vercel | Standard for Next.js; CEO gate on prod |
@@ -74,6 +75,22 @@ Contract: **state + question + options → scored options**. No free-text parse 
 
 Switch with `AION_DECISION_ADAPTER`. SemIf credentials: `AION_SEMIF_URL`, `AION_SEMIF_API_KEY`. Gateway/SemIf failures fall back to heuristic so cockpit paths stay usable offline.
 
+## Self-learning memory (Hindsight-shaped)
+
+The copilot learns from **tests, runs, sessions, mistakes, and good practices** through a provider-agnostic memory loop adapted from [Hindsight](https://github.com/vectorize-io/hindsight):
+
+```
+product → retain / recall / reflect → adapter registry
+                                        ├─ local     (in-process default)
+                                        └─ hindsight (HTTP: /v1/default/banks/{id}/…)
+```
+
+Episode kinds: `call_outcome`, `decision`, `session`, `test_run`, `mistake`, `practice`.
+
+Switch with `AION_LEARNING_MEMORY_ADAPTER`. Hindsight: `AION_HINDSIGHT_URL`, `AION_HINDSIGHT_API_KEY`. Default bank: `AION_LEARNING_BANK_ID` (per-org banks via `org-{id}`).
+
+Post-call outcomes retain into the loop; during-call guidance recalls lessons; `/learning` reflects over retained episodes. Hindsight failures fall back to local so sales paths stay available.
+
 ## Components
 
 | Component | Path | Responsibility |
@@ -85,7 +102,7 @@ Switch with `AION_DECISION_ADAPTER`. SemIf credentials: `AION_SEMIF_URL`, `AION_
 | AI client | `lib/ai/` | AION AI Gateway HTTP client |
 | Decisions | `lib/decisions/` | Provider-agnostic discrete scoring (state+question+options → scores); SemIf/gateway/heuristic connectors |
 | CRM | `lib/crm/` | Persist lead/call state, emit CRM events; approval-gated external writes |
-| Learning | `lib/learning/` | Map outcomes → learning events, ingest |
+| Learning | `lib/learning/` | Learning events + self-learning memory (`lib/learning/memory`) |
 
 ## Canonical data (target)
 `revenue_leads`, `contacts`, `deals`, `activities`, `discovery_calls`, `proposals`, `outcomes`, `events`

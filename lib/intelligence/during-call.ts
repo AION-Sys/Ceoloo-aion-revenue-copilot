@@ -5,6 +5,8 @@ import {
   decideObjectionHandling,
 } from "@/lib/decisions/sales-decisions";
 import type { DecisionResult } from "@/lib/decisions/types";
+import { recallGuidanceLessons } from "@/lib/learning/memory/loop";
+import type { RecallMemoryResult } from "@/lib/learning/memory/types";
 import {
   buildAgentSystemPrompt,
   discoveryChecklist,
@@ -32,6 +34,8 @@ export type DuringCallGuidance = {
   objectionDecision?: DecisionResult;
   /** Which decision connector produced discrete scores. */
   decisionAdapterId?: DecisionResult["adapterId"];
+  /** Lessons recalled from the self-learning memory loop. */
+  learningLessons?: RecallMemoryResult;
 };
 
 const DEFAULT_OBJECTION_REFRAMES: Record<string, string> = {
@@ -121,12 +125,20 @@ export async function generateDuringCallGuidance(
 ): Promise<DuringCallGuidance> {
   const guidance = buildDuringCallGuidance(input);
 
-  const nextBestActionDecision = await decideNextBestAction({
-    lead: input.lead,
-    context: input.context,
-    objections: input.objection ? [input.objection] : undefined,
-    repNotes: input.repNotes,
-  });
+  const [nextBestActionDecision, learningLessons] = await Promise.all([
+    decideNextBestAction({
+      lead: input.lead,
+      context: input.context,
+      objections: input.objection ? [input.objection] : undefined,
+      repNotes: input.repNotes,
+    }),
+    recallGuidanceLessons({
+      companyName: input.lead.companyName,
+      objection: input.objection,
+      workflowProblem: input.context.workflowProblems[0],
+      organizationId: input.lead.organizationId,
+    }),
+  ]);
 
   const selectedAction = nextBestActionDecision.options.find(
     (o) => o.id === nextBestActionDecision.selectedOptionId,
@@ -168,6 +180,12 @@ export async function generateDuringCallGuidance(
     }
   }
 
+  if (learningLessons.hits.length > 0) {
+    const top = learningLessons.hits[0]!;
+    const lessonLine = `Learned (${learningLessons.adapterId}/${top.kind ?? "memory"}): ${top.text}`;
+    objectionReframe = objectionReframe ? `${objectionReframe} ${lessonLine}` : lessonLine;
+  }
+
   return {
     ...guidance,
     nextBestAction: selectedAction?.label ?? guidance.nextBestAction,
@@ -175,5 +193,6 @@ export async function generateDuringCallGuidance(
     nextBestActionDecision,
     objectionDecision,
     decisionAdapterId: nextBestActionDecision.adapterId,
+    learningLessons,
   };
 }
