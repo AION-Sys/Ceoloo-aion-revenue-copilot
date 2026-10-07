@@ -168,7 +168,7 @@ export function PostCallOutcomeForm({
           <CardContent className="pt-6 text-sm text-muted-foreground">
             Demo session without Supabase — you can review fields below, but saving a{" "}
             <code className="text-xs">call_outcomes</code> row requires Supabase. CRM and
-            learning ingest remain stubs for Tasks 7–8.
+            learning ingest require Supabase. Draft CRM/follow-up actions stay unconfirmed until approved.
           </CardContent>
         </Card>
       ) : null}
@@ -180,7 +180,7 @@ export function PostCallOutcomeForm({
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <p className="text-muted-foreground">
-              Call marked complete. CRM and learning wiring land in Tasks 7–8 — outcome is
+              Call marked complete. Review CRM drafts and Follow-Up before claiming any external write — outcome is
               stored for {companyName}.
             </p>
             <ul className="list-disc space-y-1 pl-4">
@@ -201,7 +201,7 @@ export function PostCallOutcomeForm({
             </ul>
             <div className="flex flex-wrap gap-2 pt-1">
               <Button asChild size="sm" variant="outline">
-                <Link href={`/leads/${leadId}`}>Back to lead brief</Link>
+                <Link href={`/prospects/${leadId}`}>Back to prospect</Link>
               </Button>
               <Button asChild size="sm" variant="ghost">
                 <Link href="/calls">Calls</Link>

@@ -23,7 +23,7 @@ export default async function CallsPage() {
           </p>
         </div>
         <Button asChild size="sm">
-          <Link href={leads[0] ? `/leads/${leads[0].id}` : "/contacts"}>
+          <Link href={leads[0] ? `/prospects/${leads[0].id}/prep` : "/prospects"}>
             Start Call
           </Link>
         </Button>
@@ -54,7 +54,7 @@ export default async function CallsPage() {
               title="No calls yet"
               description="Start your first call to begin building Revenue Copilot intelligence."
               actionLabel="Start Call"
-              actionHref="/contacts"
+              actionHref="/prospects"
             />
           ) : (
             <div className="overflow-hidden rounded-xl border">
@@ -79,7 +79,7 @@ export default async function CallsPage() {
                       </td>
                       <td className="px-3 py-2.5">
                         <Button asChild size="sm" variant="outline">
-                          <Link href={`/leads/${lead.id}`}>Open</Link>
+                          <Link href={`/prospects/${lead.id}/prep`}>Prep</Link>
                         </Button>
                       </td>
                     </tr>

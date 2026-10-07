@@ -52,7 +52,7 @@ export default async function CallGuidancePage({ params }: CallGuidancePageProps
         </Link>
         <span className="mx-1.5">/</span>
         <Link
-          href={`/leads/${callWithLead.lead.id}`}
+          href={`/prospects/${callWithLead.lead.id}`}
           className="hover:text-foreground"
         >
           {callWithLead.lead.companyName}

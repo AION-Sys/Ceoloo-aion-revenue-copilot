@@ -1,14 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {
-  Building2,
-  FileText,
-  Phone,
-  SquareKanban,
-  CheckSquare,
-  UserPlus,
-} from "lucide-react";
+import { BookOpen, Mail, Phone, Users } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -18,12 +11,30 @@ import {
 } from "@/components/ui/dialog";
 
 const QUICK_ADD_OPTIONS = [
-  { title: "Lead", href: "/contacts", icon: UserPlus, description: "Capture a new prospect" },
-  { title: "Contact", href: "/contacts", icon: UserPlus, description: "Add a person" },
-  { title: "Deal", href: "/pipeline", icon: SquareKanban, description: "Create pipeline opportunity" },
-  { title: "Call", href: "/calls", icon: Phone, description: "Start or schedule a call" },
-  { title: "Task", href: "/tasks", icon: CheckSquare, description: "Queue a follow-up" },
-  { title: "Note", href: "/activity", icon: FileText, description: "Log a note" },
+  {
+    title: "Prospect workspace",
+    href: "/prospects",
+    icon: Users,
+    description: "Open context, history, and qualification gaps",
+  },
+  {
+    title: "Calls",
+    href: "/calls",
+    icon: Phone,
+    description: "Enter live capture or post-call review",
+  },
+  {
+    title: "Follow-Up draft",
+    href: "/follow-up",
+    icon: Mail,
+    description: "Approve message/task drafts — not auto-sent",
+  },
+  {
+    title: "Learning",
+    href: "/learning",
+    icon: BookOpen,
+    description: "Review interventions and stage movement",
+  },
 ] as const;
 
 type QuickAddDialogProps = {
@@ -36,9 +47,9 @@ export function QuickAddDialog({ open, onOpenChange }: QuickAddDialogProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Quick Add</DialogTitle>
+          <DialogTitle>Command jump</DialogTitle>
           <DialogDescription>
-            Create the next revenue action without leaving your flow.
+            Stay inside the 7-screen cockpit — no CRM side quests.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-2">
@@ -59,10 +70,6 @@ export function QuickAddDialog({ open, onOpenChange }: QuickAddDialogProps) {
             </Link>
           ))}
         </div>
-        <p className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Building2 className="h-3.5 w-3.5" />
-          Creation forms land in later workflow phases — navigation is wired now.
-        </p>
       </DialogContent>
     </Dialog>
   );

@@ -15,7 +15,7 @@ export async function startCallForLead(leadId: string) {
 
   const demoSession = await readDemoSessionFromCookies();
   if (!getSupabasePublicEnv().ok && !demoSession) {
-    redirect(`/leads/${leadId}`);
+    redirect(`/prospects/${leadId}/prep`);
   }
 
   const lead = await getLeadById(leadId);
@@ -25,7 +25,7 @@ export async function startCallForLead(leadId: string) {
 
   const call = await getOrCreateActiveCallForLead(leadId, repSession.userId);
   if (!call) {
-    redirect(`/leads/${leadId}`);
+    redirect(`/prospects/${leadId}/prep`);
   }
 
   redirect(`/calls/${call.id}/live`);

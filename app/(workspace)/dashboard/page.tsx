@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Phone, UserPlus, Upload } from "lucide-react";
+import { Phone, UserPlus } from "lucide-react";
 import { AIInsightCard } from "@/components/primitives/AIInsightCard";
 import { EmptyState } from "@/components/primitives/EmptyState";
 import { MetricCard } from "@/components/primitives/MetricCard";
@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { buildOverviewDashboard } from "@/lib/dashboard/overview";
 import { listLeadsForOrganization } from "@/lib/leads/repository";
 import { getRepSession } from "@/lib/auth/session";
+import { DEMO_FOLLOW_UPS, isDemoOrganization } from "@/lib/cockpit/demo";
 import {
   displayNameFromEmail,
   greetingForHour,
@@ -25,6 +26,7 @@ export default async function DashboardPage() {
   const overview = buildOverviewDashboard(leads);
   const repName = displayNameFromEmail(repSession.email);
   const greeting = greetingForHour(new Date().getHours());
+  const followUps = isDemoOrganization(repSession.organizationId) ? DEMO_FOLLOW_UPS : [];
 
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-6">
@@ -34,7 +36,7 @@ export default async function DashboardPage() {
             {greeting}, {repName}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Here’s what needs your attention today.
+            Command center — priority prospects, follow-ups, and the next governed move.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -45,15 +47,9 @@ export default async function DashboardPage() {
             </Link>
           </Button>
           <Button asChild variant="outline" size="sm">
-            <Link href="/contacts">
+            <Link href="/prospects">
               <UserPlus className="h-4 w-4" />
-              Add Lead
-            </Link>
-          </Button>
-          <Button asChild variant="ghost" size="sm">
-            <Link href="/contacts">
-              <Upload className="h-4 w-4" />
-              Import Prospect
+              Open Prospects
             </Link>
           </Button>
         </div>
@@ -78,15 +74,14 @@ export default async function DashboardPage() {
                 <TabsTrigger value="priority">Priority</TabsTrigger>
                 <TabsTrigger value="followups">Follow-Ups</TabsTrigger>
                 <TabsTrigger value="calls">Calls</TabsTrigger>
-                <TabsTrigger value="tasks">Tasks</TabsTrigger>
               </TabsList>
               <TabsContent value="priority" className="mt-4 space-y-0">
                 {overview.todayQueue.length === 0 ? (
                   <EmptyState
                     title="Nothing in today’s priority queue"
-                    description="Add a lead or start a call to begin the Prepare → Call → Capture loop."
-                    actionLabel="Add Lead"
-                    actionHref="/contacts"
+                    description="Add a prospect to begin Prepare → Call → Capture → Follow Up → Learn."
+                    actionLabel="Open Prospects"
+                    actionHref="/prospects"
                   />
                 ) : (
                   <ul className="divide-y rounded-lg border">
@@ -111,7 +106,7 @@ export default async function DashboardPage() {
                             Last interaction: {item.lastInteraction}
                           </p>
                           <p className="text-sm leading-snug">
-                            <span className="text-ai">AI recommendation:</span>{" "}
+                            <span className="text-ai">Recommended move:</span>{" "}
                             {item.recommendation}
                           </p>
                         </div>
@@ -128,28 +123,41 @@ export default async function DashboardPage() {
                   </ul>
                 )}
               </TabsContent>
-              <TabsContent value="followups">
-                <EmptyState
-                  title="No follow-ups queued"
-                  description="Post-call outcomes will create follow-up tasks here."
-                  actionLabel="View Tasks"
-                  actionHref="/tasks"
-                />
+              <TabsContent value="followups" className="mt-4">
+                {followUps.length === 0 ? (
+                  <EmptyState
+                    title="No follow-ups queued"
+                    description="Post-call drafts appear here after review — still drafts until confirmed."
+                    actionLabel="Open Follow-Up"
+                    actionHref="/follow-up"
+                  />
+                ) : (
+                  <ul className="divide-y rounded-lg border">
+                    {followUps.map((draft) => (
+                      <li
+                        key={draft.id}
+                        className="flex flex-col gap-2 p-3 sm:flex-row sm:items-center sm:justify-between"
+                      >
+                        <div>
+                          <p className="text-sm font-medium">{draft.subject}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {draft.companyName} · {draft.evidenceState}
+                          </p>
+                        </div>
+                        <Button asChild size="sm" variant="outline">
+                          <Link href="/follow-up">Review draft</Link>
+                        </Button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </TabsContent>
-              <TabsContent value="calls">
+              <TabsContent value="calls" className="mt-4">
                 <EmptyState
-                  title="No calls scheduled for today"
-                  description="Start a call from a priority prospect to open the live workspace."
+                  title="Jump into the call loop"
+                  description="Prep a prospect, open live capture, then post-call review."
                   actionLabel="Open Calls"
                   actionHref="/calls"
-                />
-              </TabsContent>
-              <TabsContent value="tasks">
-                <EmptyState
-                  title="No tasks due today"
-                  description="Tasks connected to deals and calls will appear in this queue."
-                  actionLabel="Open Tasks"
-                  actionHref="/tasks"
                 />
               </TabsContent>
             </Tabs>
@@ -158,9 +166,7 @@ export default async function DashboardPage() {
 
         <Card className="border-ai/20 bg-gradient-to-b from-ai/5 to-transparent">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              Revenue Copilot
-            </CardTitle>
+            <CardTitle>Revenue Copilot</CardTitle>
             <p className="text-sm text-muted-foreground">
               What should I focus on today?
             </p>
@@ -171,16 +177,13 @@ export default async function DashboardPage() {
             ))}
             <div className="flex flex-wrap gap-2 pt-1">
               <Button asChild size="sm" variant="secondary">
-                <Link href="/intelligence">Ask Copilot</Link>
+                <Link href="/prospects">Open Prospects</Link>
               </Button>
               <Button asChild size="sm" variant="outline">
-                <Link href="/tasks">Generate follow-up</Link>
+                <Link href="/follow-up">Follow-Up drafts</Link>
               </Button>
               <Button asChild size="sm" variant="outline">
-                <Link href="/calls">Build call plan</Link>
-              </Button>
-              <Button asChild size="sm" variant="ghost">
-                <Link href="/pipeline">Summarize pipeline</Link>
+                <Link href="/learning">Learning</Link>
               </Button>
             </div>
           </CardContent>

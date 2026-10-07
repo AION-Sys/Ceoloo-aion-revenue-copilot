@@ -1,14 +1,9 @@
 import {
-  Activity,
   BookOpen,
-  Brain,
-  Building2,
   LayoutDashboard,
+  Mail,
   Phone,
-  Plug,
   Settings,
-  SquareKanban,
-  CheckSquare,
   Users,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -24,47 +19,57 @@ export type NavSection = {
   items: NavItem[];
 };
 
+/**
+ * Tight 7-screen Product Lab cockpit.
+ * Workflow screens (Call Prep / Live / Review) open from Prospects + Calls.
+ */
 export const APP_NAV: NavSection[] = [
   {
-    label: "Primary",
+    label: "Command",
     items: [
-      { title: "Overview", href: "/dashboard", icon: LayoutDashboard },
+      { title: "Today", href: "/dashboard", icon: LayoutDashboard },
+      { title: "Prospects", href: "/prospects", icon: Users },
       { title: "Calls", href: "/calls", icon: Phone },
-      { title: "Pipeline", href: "/pipeline", icon: SquareKanban },
-      { title: "Tasks", href: "/tasks", icon: CheckSquare },
-      { title: "Intelligence", href: "/intelligence", icon: Brain },
+      { title: "Follow-Up", href: "/follow-up", icon: Mail },
       { title: "Learning", href: "/learning", icon: BookOpen },
     ],
   },
   {
-    label: "Workspace",
-    items: [
-      { title: "Contacts", href: "/contacts", icon: Users },
-      { title: "Accounts", href: "/accounts", icon: Building2 },
-      { title: "Activity", href: "/activity", icon: Activity },
-    ],
-  },
-  {
     label: "System",
-    items: [
-      { title: "Integrations", href: "/integrations", icon: Plug },
-      { title: "Settings", href: "/settings", icon: Settings },
-    ],
+    items: [{ title: "Settings", href: "/settings", icon: Settings }],
   },
 ];
 
 export function breadcrumbForPath(pathname: string): string[] {
-  if (pathname.startsWith("/dashboard")) return ["Revenue Copilot", "Overview"];
-  if (pathname.startsWith("/calls")) return ["Revenue Copilot", "Calls"];
-  if (pathname.startsWith("/pipeline")) return ["Revenue Copilot", "Pipeline"];
-  if (pathname.startsWith("/tasks")) return ["Revenue Copilot", "Tasks"];
-  if (pathname.startsWith("/intelligence")) return ["Revenue Copilot", "Intelligence"];
-  if (pathname.startsWith("/learning")) return ["Revenue Copilot", "Learning"];
-  if (pathname.startsWith("/contacts")) return ["Revenue Copilot", "Contacts"];
-  if (pathname.startsWith("/accounts")) return ["Revenue Copilot", "Accounts"];
-  if (pathname.startsWith("/activity")) return ["Revenue Copilot", "Activity"];
-  if (pathname.startsWith("/integrations")) return ["Revenue Copilot", "Integrations"];
-  if (pathname.startsWith("/settings")) return ["Revenue Copilot", "Settings"];
-  if (pathname.startsWith("/leads")) return ["Revenue Copilot", "Lead"];
+  if (pathname.startsWith("/dashboard")) {
+    return ["Revenue Copilot", "Today"];
+  }
+  if (pathname.startsWith("/prospects") && pathname.includes("/prep")) {
+    return ["Revenue Copilot", "Prospects", "Call Prep"];
+  }
+  if (pathname.startsWith("/prospects")) {
+    return ["Revenue Copilot", "Prospects"];
+  }
+  if (pathname.startsWith("/calls") && pathname.includes("/live")) {
+    return ["Revenue Copilot", "Calls", "Live"];
+  }
+  if (pathname.startsWith("/calls") && pathname.includes("/review")) {
+    return ["Revenue Copilot", "Calls", "Post-Call Review"];
+  }
+  if (pathname.startsWith("/calls")) {
+    return ["Revenue Copilot", "Calls"];
+  }
+  if (pathname.startsWith("/follow-up")) {
+    return ["Revenue Copilot", "Follow-Up"];
+  }
+  if (pathname.startsWith("/learning")) {
+    return ["Revenue Copilot", "Learning"];
+  }
+  if (pathname.startsWith("/settings")) {
+    return ["Revenue Copilot", "Settings"];
+  }
+  if (pathname.startsWith("/leads")) {
+    return ["Revenue Copilot", "Call Prep"];
+  }
   return ["Revenue Copilot"];
 }

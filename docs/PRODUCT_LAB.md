@@ -32,13 +32,19 @@ Lead → Business Audit → Diagnosis → Qualified Opportunity → Scope → Pr
 
 ## MVP screens (tight UI)
 
-1. **Today / Command Center** — priority prospects, follow-ups, pipeline movement, overdue tasks, recommended actions
-2. **Prospect Workspace** — company/contact context, interaction history, stage, qualification fields, known pains
-3. **Call Prep** — objective, questions, missing information, likely objections, recommended positioning
-4. **Live Call Workspace** — transcript/context, discoveries, objections, suggested responses, commitments, next-best action
-5. **Post-Call Review** — AI summary, extracted facts, outcome, funnel movement, next step, proposed CRM updates
-6. **Follow-Up Workspace** — approved email/message draft, task/date, proposal or next-meeting recommendation
-7. **Learning / Performance** — interventions that worked, outcomes, stage movement, rep corrections, conversion signals
+Primary nav is the command cockpit only — not a light CRM shell.
+
+| # | Screen | Route |
+|---|--------|-------|
+| 1 | Today / Command Center | `/dashboard` |
+| 2 | Prospect Workspace | `/prospects`, `/prospects/[id]` |
+| 3 | Call Prep | `/prospects/[id]/prep` |
+| 4 | Live Call Workspace | `/calls/[callId]/live` |
+| 5 | Post-Call Review | `/calls/[callId]/review` |
+| 6 | Follow-Up Workspace | `/follow-up` |
+| 7 | Learning / Performance | `/learning` |
+
+UI plan: [`docs/plans/mvp-command-center-cockpit.md`](./plans/mvp-command-center-cockpit.md).
 
 ## Canonical data
 Operate on AION’s revenue model — not a disconnected CRM:

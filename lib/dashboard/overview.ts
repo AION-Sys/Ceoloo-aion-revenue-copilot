@@ -121,7 +121,7 @@ export function buildOverviewDashboard(leads: Lead[]): OverviewDashboard {
     lastInteraction: lead.status === "lead" || !lead.status ? "No interaction yet" : "Funnel stage updated",
     recommendation: nextActionForStage(lead.status),
     dueLabel: "Today",
-    href: `/leads/${lead.id}`,
+    href: `/prospects/${lead.id}`,
   }));
 
   const insights: AiInsight[] = [];
@@ -131,10 +131,10 @@ export function buildOverviewDashboard(leads: Lead[]): OverviewDashboard {
       insights.push({
         id: `insight-new-${lead.id}`,
         title: `${lead.contactName ?? lead.companyName} has no follow-up yet`,
-        detail: "Open the pre-call brief and start the business audit.",
+        detail: "Open call prep and start the business audit.",
         confidence: 0.72,
         kind: "action",
-        href: `/leads/${lead.id}`,
+        href: `/prospects/${lead.id}/prep`,
       });
     }
     if (isQualifiedFunnelStage(lead.status)) {
@@ -144,7 +144,7 @@ export function buildOverviewDashboard(leads: Lead[]): OverviewDashboard {
         detail: "Confirm implementation scope and move toward a proposal.",
         confidence: 0.81,
         kind: "opportunity",
-        href: `/leads/${lead.id}`,
+        href: `/prospects/${lead.id}`,
       });
     }
   }
