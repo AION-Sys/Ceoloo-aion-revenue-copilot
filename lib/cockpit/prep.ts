@@ -1,6 +1,7 @@
 import { scoreQualificationCompleteness } from "@/lib/cockpit/qualification";
 import type { CallPrepSurface } from "@/lib/cockpit/types";
 import { buildQualificationQuestions, funnelStageLabel } from "@/lib/sales/motion";
+import { buildQualificationEngine } from "@/lib/sales/qualification-engine";
 import type { BusinessContext, Lead, QualificationProfile } from "@/lib/sales/types";
 
 export function buildCallPrepSurface(input: {
@@ -9,14 +10,23 @@ export function buildCallPrepSurface(input: {
   profile?: QualificationProfile;
 }): CallPrepSurface {
   const completeness = scoreQualificationCompleteness(input.profile);
+  const { state, policy } = buildQualificationEngine({
+    lead: input.lead,
+    context: input.context,
+    profile: input.profile,
+  });
   const stage = funnelStageLabel(input.lead.status);
   const topPain = input.context.workflowProblems[0];
   const service =
     input.context.recommendedService ?? "an AION workflow implementation engagement";
 
-  const objective = topPain
-    ? `Confirm whether ${topPain} is the primary leak and whether ${input.lead.companyName} is ready for ${service}.`
-    : `Qualify ${input.lead.companyName} for ${service} and leave with a clear next step.`;
+  const objective = policy.allowPitch
+    ? topPain
+      ? `Advance ${input.lead.companyName}: confirm fit for ${service} and lock the next step (${state.confirmed}/${state.total} confirmed).`
+      : `Advance ${input.lead.companyName} with a clear next step for ${service}.`
+    : topPain
+      ? `Stay in discovery on ${topPain}. ${policy.primaryMove}`
+      : `Qualify ${input.lead.companyName} for ${service} without pitching early. ${policy.primaryMove}`;
 
   const missingInformation = completeness.gaps.map((gap) => gap.label);
   if (!input.lead.contactName) {
@@ -34,15 +44,26 @@ export function buildCallPrepSurface(input: {
     );
   }
 
-  const positioning = topPain
-    ? `Position AION as the implementation partner that closes the ${topPain} leak — not another generic AI chat tool. Stay in the ${stage} conversation.`
-    : `Position AION as a governed implementation partner for revenue ops — stay focused on the ${stage} objective.`;
+  const positioning = policy.allowPitch
+    ? `Discovery threshold met (${state.confirmed}/${state.total}). Position AION as the implementation partner for ${service} — still confirm commitments before claiming a close.`
+    : topPain
+      ? `Do not pitch yet (${state.confirmed}/${state.total} confirmed). Position AION as the partner that closes the ${topPain} leak after impact is owned. Stay in the ${stage} conversation.`
+      : `Do not pitch yet (${state.confirmed}/${state.total} confirmed). Stay focused on the ${stage} objective until discovery clears ${policy.focusFlagId ?? "impact"}.`;
+
+  const allQuestions = buildQualificationQuestions(input.lead, input.context);
+  const prioritized = [
+    policy.primaryQuestion,
+    ...allQuestions.filter((q) => q !== policy.primaryQuestion),
+  ];
 
   return {
     objective,
     missingInformation,
     likelyObjections: likelyObjections.slice(0, 4),
     positioning,
-    recommendedQuestions: buildQualificationQuestions(input.lead, input.context),
+    recommendedQuestions: prioritized,
+    policy,
+    engineConfirmed: state.confirmed,
+    engineTotal: state.total,
   };
 }

@@ -292,6 +292,27 @@ export function LiveCallWorkspace({
               <p className="mt-1 text-sm font-medium leading-snug">
                 {guidance.nextBestAction}
               </p>
+              {guidance.copilotPolicy ? (
+                <div
+                  className={cn(
+                    "mt-2 rounded-md border px-2 py-1.5 text-[11px] leading-snug",
+                    guidance.copilotPolicy.allowPitch
+                      ? "border-emerald-500/30 bg-emerald-500/5 text-foreground"
+                      : "border-amber-500/30 bg-amber-500/5 text-foreground",
+                  )}
+                >
+                  <p className="font-semibold">
+                    {guidance.copilotPolicy.allowPitch ? "Pitch allowed" : "Do not pitch"}{" "}
+                    <span className="font-normal text-muted-foreground">
+                      · {guidance.copilotPolicy.confirmed}/{guidance.copilotPolicy.total} confirmed
+                    </span>
+                  </p>
+                  <p className="mt-0.5 text-muted-foreground">{guidance.copilotPolicy.rationale}</p>
+                  <p className="mt-1 text-foreground/90">
+                    Ask: {guidance.nextBestQuestion}
+                  </p>
+                </div>
+              ) : null}
 
               <div className="mt-3 rounded-lg border border-border/80 bg-muted/20 p-2.5">
                 <div className="mb-2 flex items-center justify-between gap-2">
