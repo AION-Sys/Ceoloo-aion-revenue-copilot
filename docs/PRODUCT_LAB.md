@@ -108,7 +108,7 @@ The **screens** are good enough to validate. The Product Lab priority is **real 
 
 | Gate | Target | Doc |
 |------|--------|-----|
-| Internal pilot (immediate) | 5 eligible real call sessions against the redefined acceptance test | [`VALIDATION.md`](./VALIDATION.md) |
+| Internal pilot (immediate) | 5 eligible real call sessions against the redefined acceptance test | [`VALIDATION.md`](./VALIDATION.md) · **[`validation/GATE_A_RUNBOOK.md`](./validation/GATE_A_RUNBOOK.md)** |
 | Commercial validation | ~25 real conversations + accuracy / usefulness / stage / conversion / lineage criteria | [`VALIDATION.md`](./VALIDATION.md) |
 
 ## Related product docs
@@ -116,3 +116,4 @@ The **screens** are good enough to validate. The Product Lab priority is **real 
 - [`ARCHITECTURE.md`](./ARCHITECTURE.md) — system design and tasks
 - [`DATA_MODEL.md`](./DATA_MODEL.md) — persistence contracts
 - [`VALIDATION.md`](./VALIDATION.md) — evidence log and gate status
+- [`validation/GATE_A_RUNBOOK.md`](./validation/GATE_A_RUNBOOK.md) — Gate A operator how-to + evidence templates

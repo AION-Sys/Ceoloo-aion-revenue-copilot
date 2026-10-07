@@ -143,7 +143,7 @@ Builder tasks implement these as small PRs.
 | Unit | `tests/unit/` | lib/intelligence, lib/learning, lib/crm |
 | Critical path | `tests/critical-path/` | post-call → CRM + learning pipeline |
 | Integration | `tests/integration/` | Supabase, AI Gateway (when wired) |
-| Manual | `docs/VALIDATION.md` | Real prospect conversations (Gate A / Gate B) |
+| Manual | `docs/VALIDATION.md` + `docs/validation/GATE_A_RUNBOOK.md` | Real prospect conversations (Gate A / Gate B) |
 
 ## Deployment
 - **Preview:** Vercel preview on PR
@@ -164,7 +164,7 @@ Builder tasks implement these as small PRs.
 | 8 | Learning event ingest (live) | Builder | 6 |
 | 9 | E2E critical path tests | Builder | 7, 8 |
 | 10 | Production deploy + release record | Release | 9, QA, Security |
-| 11 | Internal pilot evidence (Gate A) | QA / Operator | 10 |
+| 11 | Internal pilot evidence (Gate A) — runbook + templates in `docs/validation/` | QA / Operator | 10 |
 | 12 | Commercial validation evidence (Gate B) | QA / Operator | 11 |
 
 Tasks 11–12 are **validation**, not feature expansion.

@@ -35,7 +35,8 @@ aion-revenue-copilot/
 │   ├── PRD.md
 │   ├── ARCHITECTURE.md
 │   ├── DATA_MODEL.md
-│   └── VALIDATION.md    # Gate A (5-call) + Gate B (~25-call)
+│   ├── VALIDATION.md    # Gate A (5-call) + Gate B (~25-call)
+│   └── validation/      # Gate A runbook + evidence templates
 └── .github/workflows/ci.yml
 ```
 
@@ -76,6 +77,8 @@ Agents follow [aion-software-factory AGENTS.md](https://github.com/Ceoloo/aion-s
 
 ## Validation
 Real-world evidence goes in [`docs/VALIDATION.md`](docs/VALIDATION.md).
+
+**Gate A operators:** start at [`docs/validation/GATE_A_RUNBOOK.md`](docs/validation/GATE_A_RUNBOOK.md) (session templates under `docs/validation/templates/`).
 
 | Gate | Bar |
 |------|-----|

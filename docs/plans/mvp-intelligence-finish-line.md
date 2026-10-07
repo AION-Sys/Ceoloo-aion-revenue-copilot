@@ -106,10 +106,19 @@ Do **not**:
 | 2 | Canonical post-call review object + CRM proposal bundle | 1 |
 | 3 | Intervention identity on learning retain + usefulness capture | 1–2 |
 | 4 | Economic impact fields on outcome / prep | 1 |
-| 5 | Gate A operator runbook + evidence templates | — |
+| 5 | Gate A operator runbook + evidence templates (**done** → [`../validation/GATE_A_RUNBOOK.md`](../validation/GATE_A_RUNBOOK.md)) | — |
 
 P1 transcription starts only after Gate A is in motion (or CEO waives sequencing).
 
+## Gate A handoff
+
+Operators run the 5-call pilot with:
+
+- [`../validation/GATE_A_RUNBOOK.md`](../validation/GATE_A_RUNBOOK.md)
+- Templates under [`../validation/templates/`](../validation/templates/)
+- Evidence log in [`../VALIDATION.md`](../VALIDATION.md)
+
 ## Approval
 - [ ] Human/CEO acknowledges finish-line redefinition
-- [ ] Builder executes P0 PRs one at a time against this plan
+- [x] Builder executes P0 PRs one at a time against this plan (1–5)
+- [ ] Gate A evidence in motion (operator)

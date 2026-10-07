@@ -1,12 +1,22 @@
 # Validation — Mission 002
 
 ## Status
-NOT STARTED — Product Lab stage: **MVP → Validation**
+NOT STARTED — Product Lab stage: **MVP → Validation** · Gate A runbook ready
 
 ## Purpose
 Mission 002 is not validated at deploy. This document collects evidence that the copilot improves the sales workflow on **real prospect conversations**.
 
 Product Lab classification and MVP definition: [`PRODUCT_LAB.md`](./PRODUCT_LAB.md).
+
+## Operator entry point (Gate A)
+
+| Artifact | Path |
+|----------|------|
+| **Operator runbook** | [`validation/GATE_A_RUNBOOK.md`](./validation/GATE_A_RUNBOOK.md) |
+| Session evidence template | [`validation/templates/SESSION_EVIDENCE.md`](./validation/templates/SESSION_EVIDENCE.md) |
+| Gate A scorecard | [`validation/templates/GATE_A_SCORECARD.md`](./validation/templates/GATE_A_SCORECARD.md) |
+| Rep feedback | [`validation/templates/REP_FEEDBACK.md`](./validation/templates/REP_FEEDBACK.md) |
+| Synthetic separation | [`validation/templates/SYNTHETIC_SEPARATION_CHECKLIST.md`](./validation/templates/SYNTHETIC_SEPARATION_CHECKLIST.md) |
 
 ## Product Lab posture
 The **UI loop is frozen** at seven cockpit screens. Closing Mission 002 requires proving the loop on **real AION sales activity** and finishing **P0 intelligence** (qualification engine, post-call review object, governed CRM, intervention outcomes) — not new dashboards.
@@ -26,6 +36,8 @@ One AION rep takes a real prospect Lead → Prep → Discovery → Diagnosis →
 ## Gate A — Internal pilot (immediate)
 
 **Target:** 5 real eligible call sessions (includes follow-up / no-contact scenarios).
+
+**How to run:** follow [`validation/GATE_A_RUNBOOK.md`](./validation/GATE_A_RUNBOOK.md). Fill one [`SESSION_EVIDENCE`](./validation/templates/SESSION_EVIDENCE.md) per session; close with [`GATE_A_SCORECARD`](./validation/templates/GATE_A_SCORECARD.md).
 
 | Criterion | Pass when | Status |
 |-----------|-----------|--------|
