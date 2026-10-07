@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { CrmApprovalPanel } from "@/components/cockpit/CrmApprovalPanel";
 import { LineageTrail } from "@/components/cockpit/LineageTrail";
+import { PostCallReviewSummary } from "@/components/cockpit/PostCallReviewSummary";
 import { PostCallOutcomeForm } from "@/components/PostCallOutcomeForm";
 import { EmptyState } from "@/components/primitives/EmptyState";
 import { Badge } from "@/components/ui/badge";
@@ -9,10 +10,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { readDemoSessionFromCookies } from "@/lib/auth/demo";
 import { getRepSession } from "@/lib/auth/session";
 import { getCallWithLead } from "@/lib/calls/repository";
-import { buildCrmProposalsFromOutcome } from "@/lib/cockpit/crm-proposals";
 import { DEMO_CRM_PROPOSALS, isDemoOrganization } from "@/lib/cockpit/demo";
-import { buildFollowUpDraftFromOutcome } from "@/lib/cockpit/follow-up";
 import { buildLineageTrail } from "@/lib/cockpit/lineage";
+import { buildPostCallReview } from "@/lib/cockpit/post-call-review";
 import { generateDuringCallGuidance } from "@/lib/intelligence/during-call";
 import { getBusinessContextForLead } from "@/lib/leads/repository";
 import { getOutcomeByCallId } from "@/lib/outcomes/repository";
@@ -62,21 +62,19 @@ export default async function CallReviewPage({ params }: ReviewPageProps) {
     : undefined;
 
   const demo = isDemoOrganization(callWithLead.lead.organizationId);
-  const proposals = initialOutcome
-    ? buildCrmProposalsFromOutcome({
-        lead: callWithLead.lead,
-        outcome: initialOutcome,
-      })
-    : demo
-      ? DEMO_CRM_PROPOSALS
-      : [];
 
-  const followUpPreview = initialOutcome
-    ? buildFollowUpDraftFromOutcome({
+  /** Canonical post-call artifact — single source for CRM drafts + follow-up preview. */
+  const review = initialOutcome
+    ? buildPostCallReview({
+        callId: callWithLead.call.id,
         lead: callWithLead.lead,
+        context,
         outcome: initialOutcome,
       })
     : null;
+
+  const proposals = review?.crmProposals ?? (demo ? DEMO_CRM_PROPOSALS : []);
+  const followUpPreview = review?.followUp ?? null;
 
   const lineage = buildLineageTrail({
     leadId: callWithLead.lead.id,
@@ -86,7 +84,10 @@ export default async function CallReviewPage({ params }: ReviewPageProps) {
         initialOutcome?.objections.length ||
         context.workflowProblems.length,
     ),
-    recommendation: initialOutcome?.nextAction || guidance.nextBestAction,
+    recommendation:
+      review?.recommendation.nextAction ||
+      initialOutcome?.nextAction ||
+      guidance.nextBestAction,
     repDecision: initialOutcome
       ? `Outcome saved as ${initialOutcome.qualification}`
       : "Capture and save the structured outcome",
@@ -115,7 +116,7 @@ export default async function CallReviewPage({ params }: ReviewPageProps) {
           Post-call review · {callWithLead.lead.companyName}
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Capture structured outcome, review CRM drafts, and keep draft≠confirmed clear.
+          Capture structured outcome → canonical review → CRM drafts. draft≠confirmed.
         </p>
       </div>
 
@@ -152,6 +153,8 @@ export default async function CallReviewPage({ params }: ReviewPageProps) {
         suggestedNextAction={initialOutcome ? undefined : guidance.nextBestAction}
         canPersist={supabaseReady}
       />
+
+      {review ? <PostCallReviewSummary review={review} /> : null}
 
       <CrmApprovalPanel initialProposals={proposals} />
 

@@ -69,11 +69,11 @@ Flow into diagnosis, ROI argument, and Learning outcomes.
 
 ### Canonical post-call review object
 
-Single artifact after End & Review:
+Single artifact after End & Review (`lib/cockpit/post-call-review.ts` → `buildPostCallReview`):
 
 learned · evidence · qualification deltas · objections · buying signals · commitments · recommended stage · next action · follow-up · proposed CRM mutations
 
-One approval → governed CRM ops (Contact → Opportunity → Note/Task).
+Rendered on `/calls/[callId]/review` via `PostCallReviewSummary`. CRM proposals and follow-up drafts are derived from this object (not rebuilt ad hoc). One approval → governed CRM ops (Contact → Opportunity → Note/Task).
 
 ### Measurable Learning
 
