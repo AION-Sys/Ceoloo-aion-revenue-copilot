@@ -9,7 +9,12 @@ Mission 002 is not validated at deploy. This document collects evidence that the
 Product Lab classification and MVP definition: [`PRODUCT_LAB.md`](./PRODUCT_LAB.md).
 
 ## Product Lab posture
-The intelligence + UI foundation is ahead of real-world proof. **Do not expand features** to close Mission 002. Prove the loop with real AION sales activity first.
+The **UI loop is frozen** at seven cockpit screens. Closing Mission 002 requires proving the loop on **real AION sales activity** and finishing **P0 intelligence** (qualification engine, post-call review object, governed CRM, intervention outcomes) — not new dashboards.
+
+Finish-line definition: [`PRODUCT_LAB.md`](./PRODUCT_LAB.md) · [`plans/mvp-intelligence-finish-line.md`](./plans/mvp-intelligence-finish-line.md).
+
+### Acceptance test (Gate A narrative)
+One AION rep takes a real prospect Lead → Prep → Discovery → Diagnosis → Qualified Opportunity → Follow-Up while Revenue Copilot captures evidence, recommends actions, persists approved CRM changes, and records whether recommendations helped progression.
 
 ## Validation Gates (from Mission 002)
 
