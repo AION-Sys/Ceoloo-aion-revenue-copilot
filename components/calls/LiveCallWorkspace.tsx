@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,11 @@ import type {
   Commitment,
   TranscriptCaptureLine,
 } from "@/lib/cockpit/types";
+import {
+  createDiscoveryChecklist,
+  syncDiscoveryChecklist,
+  type DiscoveryChecklistItem,
+} from "@/lib/intelligence/call-workspace";
 import type { DuringCallGuidance } from "@/lib/intelligence/during-call";
 import type { BusinessContext, Lead } from "@/lib/sales/types";
 import { cn } from "@/lib/utils";
@@ -27,6 +32,32 @@ type LiveCallWorkspaceProps = {
 
 function createId(prefix: string) {
   return `${prefix}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+function discoveryStorageKey(callId: string) {
+  return `aion-live-discovery-checklist:${callId}`;
+}
+
+function readStoredChecklist(callId: string): DiscoveryChecklistItem[] | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.sessionStorage.getItem(discoveryStorageKey(callId));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as DiscoveryChecklistItem[];
+    if (!Array.isArray(parsed)) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function writeStoredChecklist(callId: string, items: DiscoveryChecklistItem[]) {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.setItem(discoveryStorageKey(callId), JSON.stringify(items));
+  } catch {
+    // ignore quota / private mode
+  }
 }
 
 export function LiveCallWorkspace({
@@ -56,15 +87,41 @@ export function LiveCallWorkspace({
   const [commitments, setCommitments] = useState<Commitment[]>([]);
   const [signalDraft, setSignalDraft] = useState("");
   const [commitmentDraft, setCommitmentDraft] = useState("");
+  const [discoveryGaps, setDiscoveryGaps] = useState<DiscoveryChecklistItem[]>(() =>
+    createDiscoveryChecklist(guidance.checklist),
+  );
+  const [checklistReady, setChecklistReady] = useState(false);
+
+  useEffect(() => {
+    const stored = readStoredChecklist(callId);
+    const next = stored
+      ? syncDiscoveryChecklist(guidance.checklist, stored)
+      : createDiscoveryChecklist(guidance.checklist);
+    setDiscoveryGaps(next);
+    setChecklistReady(true);
+  }, [callId, guidance.checklist]);
+
+  useEffect(() => {
+    if (!checklistReady) return;
+    writeStoredChecklist(callId, discoveryGaps);
+  }, [callId, discoveryGaps, checklistReady]);
+
+  const coveredGaps = discoveryGaps.filter((item) => item.checked).length;
 
   const readiness = Math.min(
     95,
     35 +
-      guidance.checklist.length * 4 +
+      coveredGaps * 6 +
       buyingSignals.length * 8 +
       commitments.length * 10 +
       Math.max(0, transcript.length - 1) * 3,
   );
+
+  function toggleDiscoveryGap(id: string, checked: boolean) {
+    setDiscoveryGaps((items) =>
+      items.map((item) => (item.id === id ? { ...item, checked } : item)),
+    );
+  }
 
   function addTranscriptLine() {
     const text = draftText.trim();
@@ -235,15 +292,38 @@ export function LiveCallWorkspace({
               <p className="mt-1 text-sm font-medium leading-snug">
                 {guidance.nextBestAction}
               </p>
-            </div>
 
-            <div>
-              <p className="text-xs font-semibold">Discovery gaps</p>
-              <ul className="mt-2 list-disc space-y-1 pl-4 text-xs text-muted-foreground">
-                {guidance.checklist.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
+              <div className="mt-3 rounded-lg border border-border/80 bg-muted/20 p-2.5">
+                <div className="mb-2 flex items-center justify-between gap-2">
+                  <p className="text-xs font-semibold">Discovery gaps</p>
+                  <p className="text-[11px] text-muted-foreground" aria-live="polite">
+                    {coveredGaps}/{discoveryGaps.length} covered
+                  </p>
+                </div>
+                <ul className="space-y-1.5" aria-label="Discovery gaps checklist">
+                  {discoveryGaps.map((item) => (
+                    <li key={item.id}>
+                      <label
+                        className={cn(
+                          "flex cursor-pointer items-start gap-2 rounded-md px-1.5 py-1 text-xs leading-snug transition-colors hover:bg-background/70",
+                          item.checked && "text-muted-foreground line-through",
+                        )}
+                      >
+                        <input
+                          type="checkbox"
+                          className="mt-0.5 size-3.5 shrink-0 rounded border border-input accent-primary"
+                          checked={item.checked}
+                          onChange={(event) =>
+                            toggleDiscoveryGap(item.id, event.target.checked)
+                          }
+                          aria-label={item.label}
+                        />
+                        <span>{item.label}</span>
+                      </label>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
 
             <div>
