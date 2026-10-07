@@ -1,5 +1,7 @@
 import { getAiGatewayEnv } from "@/lib/ai/env";
 import { complete } from "@/lib/ai/gateway";
+import { recallGuidanceLessons } from "@/lib/learning/memory/loop";
+import type { RecallMemoryResult } from "@/lib/learning/memory/types";
 import {
   buildAgentSystemPrompt,
   discoveryChecklist,
@@ -21,6 +23,8 @@ export type DuringCallGuidance = {
   nextBestQuestion: string;
   nextBestAction: string;
   qualificationPrompt: string;
+  /** Lessons recalled from the self-learning memory loop. */
+  learningLessons?: RecallMemoryResult;
 };
 
 const DEFAULT_OBJECTION_REFRAMES: Record<string, string> = {
@@ -110,18 +114,34 @@ export async function generateDuringCallGuidance(
 ): Promise<DuringCallGuidance> {
   const guidance = buildDuringCallGuidance(input);
 
-  if (!input.objection?.trim() || !getAiGatewayEnv().ok) {
-    return guidance;
-  }
+  const learningLessons = await recallGuidanceLessons({
+    companyName: input.lead.companyName,
+    objection: input.objection,
+    workflowProblem: input.context.workflowProblems[0],
+    organizationId: input.lead.organizationId,
+  });
 
-  try {
-    const objectionReframe = await generateObjectionReframeWithAi(input);
-    if (objectionReframe) {
-      return { ...guidance, objectionReframe };
+  let objectionReframe = guidance.objectionReframe;
+  if (input.objection?.trim() && getAiGatewayEnv().ok) {
+    try {
+      const aiReframe = await generateObjectionReframeWithAi(input);
+      if (aiReframe) {
+        objectionReframe = aiReframe;
+      }
+    } catch {
+      // Fall back to rule-based reframe from buildDuringCallGuidance.
     }
-  } catch {
-    // Fall back to rule-based reframe from buildDuringCallGuidance.
   }
 
-  return guidance;
+  if (learningLessons.hits.length > 0) {
+    const top = learningLessons.hits[0]!;
+    const lessonLine = `Learned (${learningLessons.adapterId}/${top.kind ?? "memory"}): ${top.text}`;
+    objectionReframe = objectionReframe ? `${objectionReframe} ${lessonLine}` : lessonLine;
+  }
+
+  return {
+    ...guidance,
+    objectionReframe,
+    learningLessons,
+  };
 }

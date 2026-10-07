@@ -1,3 +1,5 @@
+import { retainLearningEventMemory } from "@/lib/learning/memory/loop";
+import type { LearningMemoryOptions } from "@/lib/learning/memory/adapter";
 import type { CallOutcome, LearningEvent } from "@/lib/sales/types";
 
 export function outcomeToLearningEvent(outcome: CallOutcome): LearningEvent {
@@ -18,18 +20,49 @@ export function outcomeToLearningEvent(outcome: CallOutcome): LearningEvent {
 export type LearningIngestResult = {
   accepted: boolean;
   eventId?: string;
+  /** Learning-memory retain ack when the self-learning loop is enabled. */
+  memoryEpisodeId?: string;
+  memoryAdapterId?: string;
+};
+
+export type LearningIngestOptions = LearningMemoryOptions & {
+  ingestUrl?: string;
+  apiKey?: string;
+  organizationId?: string;
+  /** When false, skip retain into learning memory (default true). */
+  retainMemory?: boolean;
 };
 
 /**
- * Sends learning events to AION learning infrastructure.
- * V1: stub; Builder wires to AION_EVENTS_INGEST_URL.
+ * Sends learning events to AION learning infrastructure and retains them
+ * into the switchable self-learning memory loop (local | Hindsight).
+ * HTTP ingest remains stubbed until AION_EVENTS_INGEST_URL is wired (Task 8).
  */
 export async function ingestLearningEvent(
   event: LearningEvent,
-  _options?: { ingestUrl?: string; apiKey?: string },
+  options?: LearningIngestOptions,
 ): Promise<LearningIngestResult> {
   if (!event.eventType || !event.occurredAt) {
     return { accepted: false };
   }
-  return { accepted: true, eventId: `stub-${Date.now()}` };
+
+  const eventId = `evt-${Date.now()}`;
+  const shouldRetain = options?.retainMemory !== false;
+
+  if (!shouldRetain) {
+    return { accepted: true, eventId };
+  }
+
+  try {
+    const memory = await retainLearningEventMemory(event, options);
+    return {
+      accepted: memory.accepted,
+      eventId,
+      memoryEpisodeId: memory.episodeId,
+      memoryAdapterId: memory.adapterId,
+    };
+  } catch {
+    // Ingest must not fail the sales path if memory retain errors.
+    return { accepted: true, eventId };
+  }
 }

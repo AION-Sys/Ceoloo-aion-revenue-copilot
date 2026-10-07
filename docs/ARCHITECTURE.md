@@ -51,12 +51,29 @@ Business context (`existing_systems`, `workflow_problems`, `recommended_service`
 | App framework | Next.js 15 + TypeScript + shadcn/ui | AION standard stack; fast iteration |
 | Data store | Supabase / Postgres (canonical revenue model) | Relational lead/call state; not a second CRM |
 | AI | AION Runtime / AI Gateway → OpenRouter / providers | Centralized routing, billing, policy |
+| Self-learning memory | Switchable adapters (`local` \| `hindsight`) | Retain/recall/reflect from outcomes, tests, sessions, mistakes, practices |
 | CRM writes | GHL Adapter, human-approved | Governed Contact → Opportunity → Note/Task only for pilot |
 | Events | HTTP ingest to AION events infra | Decouple product from learning pipeline; Agent OS cost/ROI later |
 | Deployment | Vercel | Standard for Next.js; CEO gate on prod |
 | V1 scope | Assisted workspace, no autonomous calling | Validate workflow before automation |
 | Sales motion | AION implementation funnel | Qualify workflow and implementation fit |
 | Evidence | Production vs synthetic separation | Demo activity must not mutate real client records |
+
+## Self-learning memory (Hindsight-shaped)
+
+The copilot learns from **tests, runs, sessions, mistakes, and good practices** through a provider-agnostic memory loop adapted from [Hindsight](https://github.com/vectorize-io/hindsight):
+
+```
+product → retain / recall / reflect → adapter registry
+                                        ├─ local     (in-process default)
+                                        └─ hindsight (HTTP: /v1/default/banks/{id}/…)
+```
+
+Episode kinds: `call_outcome`, `decision`, `session`, `test_run`, `mistake`, `practice`.
+
+Switch with `AION_LEARNING_MEMORY_ADAPTER`. Hindsight: `AION_HINDSIGHT_URL`, `AION_HINDSIGHT_API_KEY`. Default bank: `AION_LEARNING_BANK_ID` (per-org banks via `org-{id}`).
+
+Post-call outcomes retain into the loop; during-call guidance recalls lessons; `/learning` reflects over retained episodes. Hindsight failures fall back to local so sales paths stay available.
 
 ## Components
 
@@ -68,7 +85,7 @@ Business context (`existing_systems`, `workflow_problems`, `recommended_service`
 | Intelligence | `lib/intelligence/` | Pre-call brief, objection detection (AI) |
 | AI client | `lib/ai/` | AION AI Gateway HTTP client |
 | CRM | `lib/crm/` | Persist lead/call state, emit CRM events; approval-gated external writes |
-| Learning | `lib/learning/` | Map outcomes → learning events, ingest |
+| Learning | `lib/learning/` | Learning events + self-learning memory (`lib/learning/memory`) |
 
 ## Canonical data (target)
 `revenue_leads`, `contacts`, `deals`, `activities`, `discovery_calls`, `proposals`, `outcomes`, `events`

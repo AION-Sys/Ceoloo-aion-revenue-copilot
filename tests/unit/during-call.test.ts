@@ -1,7 +1,22 @@
-import { describe, expect, it } from "vitest";
-import { buildDuringCallGuidance } from "@/lib/intelligence/during-call";
+import { afterEach, describe, expect, it } from "vitest";
+import {
+  buildDuringCallGuidance,
+  generateDuringCallGuidance,
+} from "@/lib/intelligence/during-call";
+import {
+  clearAllLocalBanks,
+  retainPracticeLearning,
+  organizationLearningBankId,
+} from "@/lib/learning/memory";
 import { buildAgentSystemPrompt } from "@/lib/sales/motion";
 import type { BusinessContext, Lead } from "@/lib/sales/types";
+
+const originalEnv = { ...process.env };
+
+afterEach(() => {
+  process.env = { ...originalEnv };
+  clearAllLocalBanks();
+});
 
 const lead: Lead = {
   id: "lead-1",
@@ -51,5 +66,33 @@ describe("buildDuringCallGuidance", () => {
     });
 
     expect(guidance.objectionReframe).toContain("cost");
+  });
+});
+
+describe("generateDuringCallGuidance + learning memory", () => {
+  it("recalls retained practices into live guidance", async () => {
+    process.env.AION_LEARNING_MEMORY_ADAPTER = "local";
+    delete process.env.AION_AI_GATEWAY_URL;
+    delete process.env.AION_AI_GATEWAY_API_KEY;
+
+    const bankId = organizationLearningBankId(lead.organizationId);
+    await retainPracticeLearning(
+      {
+        title: "Quantify slow lead response",
+        detail: "Ask what slow lead response costs in a typical week before pitching.",
+        seed: "during-call-practice",
+        occurredAt: "2026-10-06T10:00:00.000Z",
+      },
+      { adapterId: "local", bankId },
+    );
+
+    const guidance = await generateDuringCallGuidance({
+      lead,
+      context,
+      objection: "We're too busy right now",
+    });
+
+    expect(guidance.learningLessons?.hits.length).toBeGreaterThan(0);
+    expect(guidance.objectionReframe).toMatch(/Learned \(local\//);
   });
 });
