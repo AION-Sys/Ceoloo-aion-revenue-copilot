@@ -83,6 +83,8 @@ export type CrmChangeProposal = {
 
 export type LearningSignal = {
   id: string;
+  /** Stable intervention identity when the signal traces a Copilot recommendation. */
+  interventionId?: string;
   title: string;
   detail: string;
   intervention: string;
@@ -90,6 +92,10 @@ export type LearningSignal = {
   stageFrom?: FunnelStage;
   stageTo?: FunnelStage;
   useful: boolean | null;
+  /** Whether the rep acted on the recommendation. */
+  repUsed?: boolean | null;
+  /** Objection / pattern that triggered the intervention. */
+  pattern?: string;
   occurredAt: string;
 };
 

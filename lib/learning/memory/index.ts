@@ -31,6 +31,7 @@ export {
 export {
   episodeFromCallOutcome,
   episodeFromDecision,
+  episodeFromIntervention,
   episodeFromLearningEvent,
   episodeFromMistake,
   episodeFromPractice,
@@ -42,6 +43,7 @@ export {
   reflectSalesLearning,
   retainCallOutcomeLearning,
   retainDecisionLearning,
+  retainInterventionLearning,
   retainLearningEventMemory,
   retainMistakeLearning,
   retainPracticeLearning,

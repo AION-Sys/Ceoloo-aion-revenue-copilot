@@ -16,7 +16,8 @@ export type MemoryEpisodeKind =
   | "session"
   | "test_run"
   | "mistake"
-  | "practice";
+  | "practice"
+  | "intervention";
 
 export type MemoryValence = "positive" | "negative" | "neutral";
 

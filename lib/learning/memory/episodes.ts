@@ -1,3 +1,4 @@
+import type { InterventionRecord } from "@/lib/learning/interventions";
 import type { LearningEvent } from "@/lib/sales/types";
 import type { CallOutcome, Lead, QualificationState } from "@/lib/sales/types";
 import type {
@@ -21,6 +22,7 @@ export function episodeFromCallOutcome(input: {
   lead: Lead;
   outcome: CallOutcome;
   intervention?: string;
+  interventionId?: string;
 }): MemoryEpisode {
   const valence = valenceFromQualification(input.outcome.qualification);
   const pains = input.outcome.painPoints.slice(0, 3).join("; ") || "none";
@@ -41,6 +43,7 @@ export function episodeFromCallOutcome(input: {
       `Pains: ${pains}.`,
       `Objections: ${objections}.`,
       input.intervention ? `Intervention: ${input.intervention}.` : "",
+      input.interventionId ? `Intervention id: ${input.interventionId}.` : "",
       input.outcome.transcriptSummary ? `Summary: ${input.outcome.transcriptSummary}` : "",
     ]
       .filter(Boolean)
@@ -50,10 +53,67 @@ export function episodeFromCallOutcome(input: {
       organizationId: input.lead.organizationId,
       qualification: input.outcome.qualification,
       nextAction: input.outcome.nextAction,
+      ...(input.interventionId ? { interventionId: input.interventionId } : {}),
     },
     tags: [
       `company:${slug(input.lead.companyName)}`,
       `qualification:${input.outcome.qualification}`,
+      ...(input.interventionId ? [`intervention:${input.interventionId}`] : []),
+    ],
+  };
+}
+
+export function episodeFromIntervention(record: InterventionRecord): MemoryEpisode {
+  const valence: MemoryValence =
+    record.useful === true ? "positive" : record.useful === false ? "negative" : "neutral";
+
+  return {
+    id: episodeId("intervention", record.interventionId),
+    kind: "intervention",
+    valence,
+    occurredAt: record.occurredAt,
+    context: `intervention:${record.kind}`,
+    content: [
+      `Intervention ${record.interventionId} (${record.kind}).`,
+      record.pattern ? `Pattern: ${record.pattern}.` : "",
+      `Recommendation: ${record.recommendation}.`,
+      record.repUsed === true
+        ? "Rep used it."
+        : record.repUsed === false
+          ? "Rep did not use it."
+          : "Rep use unknown.",
+      record.prospectResponse ? `Prospect response: ${record.prospectResponse}.` : "",
+      record.stageBefore || record.stageAfter
+        ? `Stage: ${record.stageBefore ?? "—"} → ${record.stageAfter ?? "—"}.`
+        : "",
+      record.eventualOutcome ? `Outcome: ${record.eventualOutcome}.` : "",
+      typeof record.revenueCents === "number"
+        ? `Revenue cents: ${record.revenueCents}.`
+        : "",
+    ]
+      .filter(Boolean)
+      .join(" "),
+    metadata: {
+      interventionId: record.interventionId,
+      kind: record.kind,
+      pattern: record.pattern ?? null,
+      recommendation: record.recommendation,
+      repUsed: record.repUsed,
+      useful: record.useful,
+      prospectResponse: record.prospectResponse ?? null,
+      stageBefore: record.stageBefore ?? null,
+      stageAfter: record.stageAfter ?? null,
+      eventualOutcome: record.eventualOutcome ?? null,
+      revenueCents: record.revenueCents ?? null,
+      callId: record.callId ?? null,
+      leadId: record.leadId ?? null,
+      organizationId: record.organizationId ?? null,
+    },
+    tags: [
+      `intervention:${record.interventionId}`,
+      `kind:${record.kind}`,
+      record.useful === true ? "useful:yes" : record.useful === false ? "useful:no" : "useful:pending",
+      record.repUsed === true ? "rep_used:yes" : record.repUsed === false ? "rep_used:no" : "rep_used:pending",
     ],
   };
 }

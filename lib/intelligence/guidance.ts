@@ -51,6 +51,7 @@ export async function getGuidanceForCall(
     context,
     repNotes: input.repNotes,
     objection: input.objection,
+    callId: callWithLead.call.id,
   });
 
   return {
