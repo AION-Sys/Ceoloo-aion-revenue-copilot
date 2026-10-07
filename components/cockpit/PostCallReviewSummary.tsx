@@ -92,6 +92,15 @@ export function PostCallReviewSummary({ review }: PostCallReviewSummaryProps) {
           </div>
         </section>
 
+        {review.evidence.economicImpactSummary ? (
+          <section className="space-y-1 rounded-lg border border-border bg-muted/20 px-3 py-2.5">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Economic impact
+            </h3>
+            <p className="font-medium leading-snug">{review.evidence.economicImpactSummary}</p>
+          </section>
+        ) : null}
+
         <section className="space-y-2">
           <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             What we learned

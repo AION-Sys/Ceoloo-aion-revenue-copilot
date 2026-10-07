@@ -1,3 +1,4 @@
+import { parseEconomicImpact } from "@/lib/sales/economic-impact";
 import type { ObjectionRecord, QualificationProfile, QualificationState } from "@/lib/sales/types";
 import { QUALIFICATION_DIMENSIONS } from "@/lib/sales/motion";
 
@@ -79,6 +80,11 @@ function parseQualificationProfile(value: unknown): QualificationProfile | undef
     if (typeof raw === "string" && raw.trim()) {
       profile[key] = raw.trim();
     }
+  }
+
+  const economicImpact = parseEconomicImpact(record.economicImpact);
+  if (economicImpact) {
+    profile.economicImpact = economicImpact;
   }
 
   return Object.keys(profile).length > 0 ? profile : undefined;

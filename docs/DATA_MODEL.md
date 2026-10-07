@@ -55,7 +55,7 @@ Prospect workflow context for AION's implementation motion. Not a funding applic
 | id | uuid PK | |
 | call_id | uuid FK | unique |
 | qualification | text | unqualified, exploring, qualified, disqualified |
-| qualification_profile | jsonb | AION dimensions: currentWorkflow, businessImpact, existingSystems, automationOpportunity, decisionMaker, implementationReadiness, urgencyTimeline, budgetFit, recommendedService |
+| qualification_profile | jsonb | AION dimensions: currentWorkflow, businessImpact, existingSystems, automationOpportunity, decisionMaker, implementationReadiness, urgencyTimeline, budgetFit, recommendedService, optional `economicImpact` `{ leadsPerMonth, delayedShare, avgJobValue, closeRate, monthlyRevenueExposure, source, notes }` |
 | pain_points | jsonb | string[] — workflow problems heard on the call |
 | objections | jsonb | ObjectionRecord[] |
 | next_action | text | |

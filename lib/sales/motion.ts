@@ -31,9 +31,15 @@ export const FUNNEL_STAGE_LABELS: Record<FunnelStage, string> = {
   onboarding: "Onboarding",
 };
 
+/** Text dimensions only — structured economicImpact lives beside these keys. */
+export type QualificationProfileTextKey = Exclude<
+  keyof QualificationProfile,
+  "economicImpact"
+>;
+
 export type QualificationDimension = {
   id: string;
-  profileKey: keyof QualificationProfile;
+  profileKey: QualificationProfileTextKey;
   label: string;
   checklist: string;
   question: (lead: Lead, context: BusinessContext) => string;

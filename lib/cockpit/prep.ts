@@ -1,5 +1,10 @@
 import { scoreQualificationCompleteness } from "@/lib/cockpit/qualification";
 import type { CallPrepSurface } from "@/lib/cockpit/types";
+import {
+  economicImpactDiscoveryQuestion,
+  formatEconomicImpactSummary,
+  hasQuantifiedEconomicImpact,
+} from "@/lib/sales/economic-impact";
 import { buildQualificationQuestions, funnelStageLabel } from "@/lib/sales/motion";
 import { buildQualificationEngine } from "@/lib/sales/qualification-engine";
 import type { BusinessContext, Lead, QualificationProfile } from "@/lib/sales/types";
@@ -19,6 +24,14 @@ export function buildCallPrepSurface(input: {
   const topPain = input.context.workflowProblems[0];
   const service =
     input.context.recommendedService ?? "an AION workflow implementation engagement";
+  const economicImpact = input.profile?.economicImpact ?? null;
+  const impactQuantified = hasQuantifiedEconomicImpact(economicImpact);
+  const economicImpactSummary = economicImpact
+    ? formatEconomicImpactSummary(economicImpact)
+    : undefined;
+  const economicImpactPrompt = impactQuantified
+    ? undefined
+    : economicImpactDiscoveryQuestion(input.lead.companyName);
 
   const objective = policy.allowPitch
     ? topPain
@@ -53,8 +66,20 @@ export function buildCallPrepSurface(input: {
   const allQuestions = buildQualificationQuestions(input.lead, input.context);
   const prioritized = [
     policy.primaryQuestion,
-    ...allQuestions.filter((q) => q !== policy.primaryQuestion),
+    ...(economicImpactPrompt && economicImpactPrompt !== policy.primaryQuestion
+      ? [economicImpactPrompt]
+      : []),
+    ...allQuestions.filter(
+      (q) => q !== policy.primaryQuestion && q !== economicImpactPrompt,
+    ),
   ];
+
+  if (!impactQuantified) {
+    const impactGap = "Business impact quantified (leads × delay × job value × close rate)";
+    if (!missingInformation.includes(impactGap) && !missingInformation.some((m) => /impact/i.test(m))) {
+      missingInformation.unshift(impactGap);
+    }
+  }
 
   return {
     objective,
@@ -65,5 +90,8 @@ export function buildCallPrepSurface(input: {
     policy,
     engineConfirmed: state.confirmed,
     engineTotal: state.total,
+    economicImpact,
+    economicImpactSummary,
+    economicImpactPrompt,
   };
 }

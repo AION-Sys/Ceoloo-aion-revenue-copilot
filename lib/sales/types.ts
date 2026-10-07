@@ -43,6 +43,25 @@ export type BusinessContext = {
 
 export type QualificationState = "unqualified" | "exploring" | "qualified" | "disqualified";
 
+export type EconomicImpactSource = "rep_estimate" | "prospect_stated" | "derived";
+
+/**
+ * Quantified revenue exposure inputs (finish-line).
+ * Formula: leads/month × delayed_share × avg_job_value × close_rate ≈ monthly_revenue_exposure
+ */
+export type EconomicImpact = {
+  leadsPerMonth?: number;
+  /** Share of leads delayed or missed (0–1). */
+  delayedShare?: number;
+  avgJobValue?: number;
+  /** Close rate (0–1). */
+  closeRate?: number;
+  /** Computed when all four inputs are valid — never invent. */
+  monthlyRevenueExposure?: number;
+  notes?: string;
+  source?: EconomicImpactSource;
+};
+
 /**
  * Qualification snapshot for an AION implementation opportunity.
  * Keys match the sales-motion dimensions. Funding fields are not part of this schema.
@@ -57,6 +76,8 @@ export type QualificationProfile = {
   urgencyTimeline?: string;
   budgetFit?: string;
   recommendedService?: string;
+  /** Structured exposure inputs — preferred over vague businessImpact alone. */
+  economicImpact?: EconomicImpact;
 };
 
 export type CallOutcome = {

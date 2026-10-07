@@ -7,6 +7,10 @@ import type {
   FollowUpDraft,
 } from "@/lib/cockpit/types";
 import { qualificationToLeadStatus } from "@/lib/crm/status";
+import {
+  formatEconomicImpactSummary,
+  hasQuantifiedEconomicImpact,
+} from "@/lib/sales/economic-impact";
 import { FUNNEL_STAGE_LABELS } from "@/lib/sales/motion";
 import {
   buildQualificationEngine,
@@ -18,6 +22,7 @@ import {
 import type {
   BusinessContext,
   CallOutcome,
+  EconomicImpact,
   FunnelStage,
   Lead,
   ObjectionRecord,
@@ -38,6 +43,8 @@ export type PostCallReviewEvidence = {
   transcriptSummary?: string;
   workflowProblems: string[];
   existingSystems: string[];
+  economicImpact?: EconomicImpact;
+  economicImpactSummary?: string;
 };
 
 export type PostCallReviewRecommendation = {
@@ -102,6 +109,10 @@ function buildLearnedBullets(input: {
   if (input.outcome.painPoints.filter((p) => p.trim()).length > 0) {
     bullets.push(`Pains captured: ${input.outcome.painPoints.filter((p) => p.trim()).join("; ")}`);
   }
+  const economic = input.outcome.qualificationProfile?.economicImpact;
+  if (hasQuantifiedEconomicImpact(economic)) {
+    bullets.push(`Economic impact: ${formatEconomicImpactSummary(economic!)}`);
+  }
   if (input.outcome.objections.some((o) => o.objection.trim())) {
     const open = input.outcome.objections.filter((o) => o.objection.trim() && !o.resolved);
     bullets.push(
@@ -160,11 +171,16 @@ export function buildPostCallReview(input: BuildPostCallReviewInput): PostCallRe
   const crmProposals = buildCrmProposalsFromOutcome({ lead, outcome });
   const followUp = buildFollowUpDraftFromOutcome({ lead, outcome });
 
+  const economicImpact = outcome.qualificationProfile?.economicImpact;
   const evidence: PostCallReviewEvidence = {
     painPoints: outcome.painPoints.map((p) => p.trim()).filter(Boolean),
     transcriptSummary: outcome.transcriptSummary?.trim() || undefined,
     workflowProblems: [...context.workflowProblems],
     existingSystems: [...context.existingSystems],
+    economicImpact,
+    economicImpactSummary: economicImpact
+      ? formatEconomicImpactSummary(economicImpact)
+      : undefined,
   };
 
   return {

@@ -11,7 +11,7 @@ export function scoreQualificationCompleteness(
   profile: QualificationProfile | undefined | null,
 ): QualificationCompleteness {
   const gaps: QualificationGap[] = [];
-  const filledKeys: Array<keyof QualificationProfile> = [];
+  const filledKeys: Array<Exclude<keyof QualificationProfile, "economicImpact">> = [];
 
   for (const dimension of QUALIFICATION_DIMENSIONS) {
     const value = profile?.[dimension.profileKey];

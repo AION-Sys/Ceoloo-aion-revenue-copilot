@@ -19,6 +19,14 @@ export const DEMO_QUALIFICATION_PROFILE: QualificationProfile = {
   automationOpportunity: "Lead intake → follow-up sequence → job status sync",
   decisionMaker: "Jordan Lee (owner)",
   // Intentionally incomplete so Prospect Workspace shows gaps.
+  // Partial economic inputs — exposure not yet computed (missing close rate).
+  economicImpact: {
+    leadsPerMonth: 40,
+    delayedShare: 0.25,
+    avgJobValue: 4000,
+    source: "rep_estimate",
+    notes: "Owner ballpark on same-day lead miss",
+  },
 };
 
 export const DEMO_INTERACTIONS: InteractionEvent[] = [
