@@ -121,6 +121,10 @@ export type CallPrepSurface = {
   likelyObjections: string[];
   positioning: string;
   recommendedQuestions: string[];
+  /** Copilot policy from the qualification state machine. */
+  policy?: import("@/lib/sales/qualification-engine").CopilotPolicy;
+  engineConfirmed?: number;
+  engineTotal?: number;
 };
 
 export type ProspectWorkspaceModel = {

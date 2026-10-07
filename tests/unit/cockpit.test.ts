@@ -69,10 +69,12 @@ describe("call prep surface", () => {
       },
       profile: { currentWorkflow: "phone only" },
     });
-    expect(prep.objective).toContain("manual lead follow-up");
+    expect(prep.objective.toLowerCase()).toMatch(/discovery|manual lead follow-up/);
+    expect(prep.policy?.allowPitch).toBe(false);
     expect(prep.missingInformation.length).toBeGreaterThan(0);
     expect(prep.likelyObjections.length).toBeGreaterThan(0);
     expect(prep.recommendedQuestions.length).toBeGreaterThan(0);
+    expect(prep.recommendedQuestions[0]?.toLowerCase()).toMatch(/cost|impact/);
   });
 });
 

@@ -41,6 +41,18 @@ export function PreCallBriefPanel({ brief, profile }: PreCallBriefPanelProps) {
         <CardContent>
           <p className="text-sm leading-relaxed">{prep.objective}</p>
           <p className="mt-3 text-xs text-muted-foreground">{prep.positioning}</p>
+          {prep.policy ? (
+            <p
+              className="mt-3 rounded-md border border-border/80 bg-muted/30 px-2.5 py-2 text-xs leading-snug"
+              aria-live="polite"
+            >
+              <span className="font-semibold">
+                {prep.policy.allowPitch ? "Pitch allowed" : "Do not pitch"}
+              </span>
+              {" · "}
+              {prep.engineConfirmed}/{prep.engineTotal} flags confirmed. {prep.policy.rationale}
+            </p>
+          ) : null}
         </CardContent>
       </Card>
 

@@ -12,13 +12,20 @@ import {
   discoveryChecklist,
   nextActionForStage,
 } from "@/lib/sales/motion";
-import type { BusinessContext, Lead } from "@/lib/sales/types";
+import {
+  buildQualificationEngine,
+  type CopilotPolicy,
+  type QualificationEngineState,
+} from "@/lib/sales/qualification-engine";
+import type { BusinessContext, Lead, QualificationProfile } from "@/lib/sales/types";
 
 export type DuringCallGuidanceInput = {
   lead: Lead;
   context: BusinessContext;
   repNotes?: string;
   objection?: string;
+  profile?: QualificationProfile | null;
+  nextAction?: string;
 };
 
 export type DuringCallGuidance = {
@@ -36,6 +43,9 @@ export type DuringCallGuidance = {
   decisionAdapterId?: DecisionResult["adapterId"];
   /** Lessons recalled from the self-learning memory loop. */
   learningLessons?: RecallMemoryResult;
+  /** Structured qualification state + Copilot policy. */
+  qualificationState?: QualificationEngineState;
+  copilotPolicy?: CopilotPolicy;
 };
 
 const DEFAULT_OBJECTION_REFRAMES: Record<string, string> = {
@@ -65,19 +75,29 @@ export function buildDuringCallGuidance(input: DuringCallGuidanceInput): DuringC
   const { lead, context, repNotes, objection } = input;
   const notes = repNotes?.trim();
   const checklist = discoveryChecklist();
+  const { state, policy } = buildQualificationEngine({
+    lead,
+    context,
+    profile: input.profile,
+    evidence: { nextAction: input.nextAction },
+  });
 
-  const scriptCue = notes
-    ? `Based on what you've heard (${notes.slice(0, 120)}${notes.length > 120 ? "…" : ""}), reflect the workflow problem and ask which funnel step comes next: audit, diagnosis, scope, or proposal.`
-    : `Open the business audit for ${lead.companyName}. Ask how work runs in their ${context.industry} operation, then which workflow problem is most expensive.`;
+  const scriptCue = policy.allowPitch
+    ? notes
+      ? `Based on what you've heard (${notes.slice(0, 120)}${notes.length > 120 ? "…" : ""}), lock the next funnel step — discovery threshold is met (${state.confirmed}/${state.total}).`
+      : `Discovery looks complete enough (${state.confirmed}/${state.total}). Confirm service fit and commit the next step for ${lead.companyName}.`
+    : notes
+      ? `Based on what you've heard (${notes.slice(0, 120)}${notes.length > 120 ? "…" : ""}), stay in discovery — do not pitch yet (${state.confirmed}/${state.total}).`
+      : `Open the business audit for ${lead.companyName}. Do not pitch yet (${state.confirmed}/${state.total}). Ask how work runs in their ${context.industry} operation, then quantify the most expensive workflow problem.`;
 
-  const nextBestQuestion =
-    context.workflowProblems.length > 0
-      ? `When ${context.workflowProblems[0]} happens, what does that cost the business in a typical week?`
-      : "Which part of the current workflow should an implementation change first?";
+  const nextBestQuestion = policy.primaryQuestion;
 
-  const nextBestAction = context.recommendedService
-    ? `Propose the next funnel step for ${context.recommendedService}: audit, diagnosis, implementation scope, or proposal.`
-    : nextActionForStage(lead.status);
+  const nextBestAction = policy.allowPitch
+    ? policy.primaryMove
+    : policy.primaryMove ||
+      (context.recommendedService
+        ? `Stay in discovery before proposing ${context.recommendedService}.`
+        : nextActionForStage(lead.status));
 
   return {
     scriptCue,
@@ -87,6 +107,8 @@ export function buildDuringCallGuidance(input: DuringCallGuidanceInput): DuringC
     nextBestAction,
     qualificationPrompt:
       "Qualify on current workflow, business impact, existing systems, automation opportunity, decision maker, implementation readiness, urgency/timeline, budget/commercial fit, and recommended AION service. Then mark unqualified, exploring, qualified, or disqualified.",
+    qualificationState: state,
+    copilotPolicy: policy,
   };
 }
 
@@ -186,9 +208,16 @@ export async function generateDuringCallGuidance(
     objectionReframe = objectionReframe ? `${objectionReframe} ${lessonLine}` : lessonLine;
   }
 
+  // Qualification policy owns the live next-best action string when discovery
+  // is incomplete; decision adapters stay attached as scored metadata.
+  const nextBestAction =
+    guidance.copilotPolicy && !guidance.copilotPolicy.allowPitch
+      ? guidance.nextBestAction
+      : (selectedAction?.label ?? guidance.nextBestAction);
+
   return {
     ...guidance,
-    nextBestAction: selectedAction?.label ?? guidance.nextBestAction,
+    nextBestAction,
     objectionReframe,
     nextBestActionDecision,
     objectionDecision,

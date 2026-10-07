@@ -34,7 +34,7 @@ const context: BusinessContext = {
 };
 
 describe("buildDuringCallGuidance", () => {
-  it("includes discovery checklist and next-best question from context", () => {
+  it("includes discovery checklist and policy-driven next-best question", () => {
     const guidance = buildDuringCallGuidance({ lead, context });
 
     expect(guidance.checklist.length).toBeGreaterThan(2);
@@ -42,8 +42,9 @@ describe("buildDuringCallGuidance", () => {
       true,
     );
     expect(guidance.checklist.some((item) => item.toLowerCase().includes("automation"))).toBe(true);
-    expect(guidance.nextBestQuestion).toContain("slow lead response");
-    expect(guidance.nextBestAction).toContain("workflow automation implementation");
+    expect(guidance.nextBestQuestion.toLowerCase()).toMatch(/cost|impact|slow lead response/);
+    expect(guidance.copilotPolicy?.allowPitch).toBe(false);
+    expect(guidance.nextBestAction.toLowerCase()).toMatch(/do not pitch|quantify|discovery/);
     expect(guidance.qualificationPrompt.toLowerCase()).not.toContain("capital");
     expect(buildAgentSystemPrompt().toLowerCase()).not.toContain("annual revenue");
   });
@@ -56,6 +57,7 @@ describe("buildDuringCallGuidance", () => {
     });
 
     expect(guidance.scriptCue).toContain("They lose leads after hours");
+    expect(guidance.scriptCue.toLowerCase()).toMatch(/do not pitch/);
   });
 
   it("returns an objection reframe when an objection is supplied", () => {

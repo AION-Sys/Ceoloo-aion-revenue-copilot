@@ -2,11 +2,14 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { LiveCallWorkspace } from "@/components/calls/LiveCallWorkspace";
 import { EmptyState } from "@/components/primitives/EmptyState";
-import { readDemoSessionFromCookies } from "@/lib/auth/demo";
+import { DEMO_ORG_ID, readDemoSessionFromCookies } from "@/lib/auth/demo";
 import { getRepSession } from "@/lib/auth/session";
 import { getCallWithLead } from "@/lib/calls/repository";
+import { DEMO_QUALIFICATION_PROFILE } from "@/lib/cockpit/demo";
 import { generateDuringCallGuidance } from "@/lib/intelligence/during-call";
 import { getBusinessContextForLead } from "@/lib/leads/repository";
+import { getOutcomeByCallId } from "@/lib/outcomes/repository";
+import { mapCallOutcomeRow } from "@/lib/outcomes/mappers";
 import { getSupabasePublicEnv } from "@/lib/supabase/env";
 
 type LiveCallPageProps = {
@@ -39,9 +42,31 @@ export default async function LiveCallPage({ params }: LiveCallPageProps) {
   }
 
   const context = await getBusinessContextForLead(callWithLead.lead);
+
+  let profile =
+    callWithLead.lead.organizationId === DEMO_ORG_ID
+      ? DEMO_QUALIFICATION_PROFILE
+      : undefined;
+  let nextAction: string | undefined;
+
+  if (getSupabasePublicEnv().ok) {
+    try {
+      const existingOutcome = await getOutcomeByCallId(callWithLead.call.id);
+      if (existingOutcome) {
+        const mapped = mapCallOutcomeRow(existingOutcome, callWithLead.lead.id);
+        profile = mapped.qualificationProfile ?? profile;
+        nextAction = mapped.nextAction;
+      }
+    } catch {
+      // Demo / missing Supabase — keep profile from demo fixtures when available.
+    }
+  }
+
   const guidance = await generateDuringCallGuidance({
     lead: callWithLead.lead,
     context,
+    profile,
+    nextAction,
   });
 
   return (
