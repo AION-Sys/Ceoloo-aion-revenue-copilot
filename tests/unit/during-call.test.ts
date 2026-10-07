@@ -5,8 +5,8 @@ import {
 } from "@/lib/intelligence/during-call";
 import {
   clearAllLocalBanks,
-  retainPracticeLearning,
   organizationLearningBankId,
+  retainPracticeLearning,
 } from "@/lib/learning/memory";
 import { buildAgentSystemPrompt } from "@/lib/sales/motion";
 import type { BusinessContext, Lead } from "@/lib/sales/types";
@@ -69,9 +69,30 @@ describe("buildDuringCallGuidance", () => {
   });
 });
 
+describe("generateDuringCallGuidance + decision adapter", () => {
+  it("attaches switchable discrete decision scores", async () => {
+    process.env.AION_DECISION_ADAPTER = "heuristic";
+    delete process.env.AION_AI_GATEWAY_URL;
+    delete process.env.AION_AI_GATEWAY_API_KEY;
+
+    const guidance = await generateDuringCallGuidance({
+      lead,
+      context,
+      objection: "We're too busy to change workflows",
+    });
+
+    expect(guidance.decisionAdapterId).toBe("heuristic");
+    expect(guidance.nextBestActionDecision?.decisionType).toBe("sales.next_best_action");
+    expect(guidance.objectionDecision?.decisionType).toBe("sales.objection_handling");
+    expect(guidance.objectionReframe).toMatch(/Strategy \(heuristic\)/);
+    expect(guidance.nextBestAction.length).toBeGreaterThan(0);
+  });
+});
+
 describe("generateDuringCallGuidance + learning memory", () => {
   it("recalls retained practices into live guidance", async () => {
     process.env.AION_LEARNING_MEMORY_ADAPTER = "local";
+    process.env.AION_DECISION_ADAPTER = "heuristic";
     delete process.env.AION_AI_GATEWAY_URL;
     delete process.env.AION_AI_GATEWAY_API_KEY;
 
@@ -94,5 +115,6 @@ describe("generateDuringCallGuidance + learning memory", () => {
 
     expect(guidance.learningLessons?.hits.length).toBeGreaterThan(0);
     expect(guidance.objectionReframe).toMatch(/Learned \(local\//);
+    expect(guidance.decisionAdapterId).toBe("heuristic");
   });
 });

@@ -51,6 +51,7 @@ Business context (`existing_systems`, `workflow_problems`, `recommended_service`
 | App framework | Next.js 15 + TypeScript + shadcn/ui | AION standard stack; fast iteration |
 | Data store | Supabase / Postgres (canonical revenue model) | Relational lead/call state; not a second CRM |
 | AI | AION Runtime / AI Gateway → OpenRouter / providers | Centralized routing, billing, policy |
+| Discrete decisions | Switchable adapters (`heuristic` \| `gateway` \| `semif`) | Models/tools stay agnostic; product calls `decide()` only |
 | Self-learning memory | Switchable adapters (`local` \| `hindsight`) | Retain/recall/reflect from outcomes, tests, sessions, mistakes, practices |
 | CRM writes | GHL Adapter, human-approved | Governed Contact → Opportunity → Note/Task only for pilot |
 | Events | HTTP ingest to AION events infra | Decouple product from learning pipeline; Agent OS cost/ROI later |
@@ -58,6 +59,21 @@ Business context (`existing_systems`, `workflow_problems`, `recommended_service`
 | V1 scope | Assisted workspace, no autonomous calling | Validate workflow before automation |
 | Sales motion | AION implementation funnel | Qualify workflow and implementation fit |
 | Evidence | Production vs synthetic separation | Demo activity must not mutate real client records |
+
+## Decision adapters (model / tool agnostic)
+
+Discrete sales choices (qualification, next-best action, objection strategy) go through `lib/decisions`, not vendor SDKs.
+
+```
+product code → decide(request) → adapter registry
+                                    ├─ heuristic  (offline default)
+                                    ├─ gateway    (AI Gateway JSON scores)
+                                    └─ semif      (SemIf/OpenJev probabilities)
+```
+
+Contract: **state + question + options → scored options**. No free-text parse into CRM fields.
+
+Switch with `AION_DECISION_ADAPTER`. SemIf credentials: `AION_SEMIF_URL`, `AION_SEMIF_API_KEY`. Gateway/SemIf failures fall back to heuristic so cockpit paths stay usable offline.
 
 ## Self-learning memory (Hindsight-shaped)
 
@@ -84,6 +100,7 @@ Post-call outcomes retain into the loop; during-call guidance recalls lessons; `
 | Sales domain | `lib/sales/` | Funnel, qualification dimensions, agent instructions, lead and outcome types |
 | Intelligence | `lib/intelligence/` | Pre-call brief, objection detection (AI) |
 | AI client | `lib/ai/` | AION AI Gateway HTTP client |
+| Decisions | `lib/decisions/` | Provider-agnostic discrete scoring (state+question+options → scores); SemIf/gateway/heuristic connectors |
 | CRM | `lib/crm/` | Persist lead/call state, emit CRM events; approval-gated external writes |
 | Learning | `lib/learning/` | Learning events + self-learning memory (`lib/learning/memory`) |
 
