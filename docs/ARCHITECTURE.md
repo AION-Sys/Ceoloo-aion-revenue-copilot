@@ -99,6 +99,8 @@ Post-call outcomes retain into the loop; during-call guidance recalls lessons; `
 | App shell | `app/` | Routes, layout, MVP screens |
 | UI components | `components/` | Workflow phases, call panels |
 | Sales domain | `lib/sales/` | Funnel, qualification dimensions, agent instructions, lead and outcome types |
+| Qualification engine | `lib/sales/qualification-engine.ts` | 10-flag state machine + Copilot pitch policy |
+| Cockpit helpers | `lib/cockpit/` | Prep, lineage, CRM proposals, follow-up drafts, **canonical post-call review** (`post-call-review.ts`) |
 | Intelligence | `lib/intelligence/` | Pre-call brief, objection detection (AI) |
 | AI client | `lib/ai/` | AION AI Gateway HTTP client |
 | Decisions | `lib/decisions/` | Provider-agnostic discrete scoring (state+question+options → scores); SemIf/gateway/heuristic connectors |
